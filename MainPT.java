@@ -1,11 +1,23 @@
 
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.text.*;
 import java.util.*;
+import java.time.*;
 import javax.swing.event.*;
-
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.text.BadLocationException;
+import java.util.Scanner;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -17,51 +29,48 @@ import javax.swing.event.*;
  * @author Admin
  */
 public class MainPT {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         String name = "David";
-        String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
-            "Sit-ups", "Warm-up", "Weights" };//Demo equipment list
+        
+        //String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
+        //    "Sit-ups", "Warm-up", "Weights" };//Demo equipment list
+        
         
         new PT();
         //new SAP(0);
-        
         //new ViewPlans(name);
         //new Modify(name);
-        
         //new ViewRatings(name);
-        
         //new MakePlan(name);
-        
         //new ViewActivities(things);
         //new Create(things);
         //new ModifySelect();
-        //new ModifyAct();
         
     }
 }
     class PT extends JFrame{
+        public static String[] actlist;
         
-    public PT(){
+    public PT() throws FileNotFoundException{
         super("Personal Trainer");
+        ReadWrite rw = new ReadWrite();
+        actlist = rw.ReadArray();
         JPanel background = new JPanel();
         background.setLayout(new BoxLayout(background, BoxLayout.PAGE_AXIS));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(500,400);
-        
         setLocationRelativeTo(null);
         background.setBackground(Color.yellow);
         
-        final String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
-            "Sit-ups", "Warm-up", "Weights" };//Demo equipment list
-       
-        JButton MXP =  new JButton("Make Exercise Plan");
-        JButton VXR =  new JButton("View Exercise Ratings");
+        
+        JButton MXP =  new JButton("Make Exercise Plan and View Ratings & Preferences");
+        //JButton VXR =  new JButton("View Exercise Ratings");
         JButton VXP = new JButton("View Old Exercise Plans");
         JButton VXA =  new JButton("View Exercise Activities");
         JButton exit = new JButton("Exit to Family Planner");
         
         MXP.setAlignmentX(Component.CENTER_ALIGNMENT);
-        VXR.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //VXR.setAlignmentX(Component.CENTER_ALIGNMENT);
         VXP.setAlignmentX(Component.CENTER_ALIGNMENT);
         VXA.setAlignmentX(Component.CENTER_ALIGNMENT);
         exit.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -70,23 +79,22 @@ public class MainPT {
         background.add(MXP);
         MXP.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                new SAP(1);
+                new SAP(1, actlist);
                 dispose();
             }});
         
         background.add(Box.createVerticalGlue());
-        background.add(VXR);
-        VXR.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                new SAP(2);
-                dispose();
-            }});
+        //background.add(VXR);
+        /*VXR.addActionListener(new ActionListener(){
+        public void actionPerformed(ActionEvent e){
+        new SAP(2, actlist);
+        dispose();
+        }});*/
         
-        background.add(Box.createVerticalGlue());
         background.add(VXP);
         VXP.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                new SAP(3);
+                new SAP(3, actlist);
                 dispose();
             }});
         
@@ -95,7 +103,7 @@ public class MainPT {
         background.add(VXA);
         VXA.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                new ViewActivities(things);
+                new ViewActivities(actlist);
                 dispose();
                 
             }});
@@ -121,24 +129,28 @@ public class MainPT {
 }
 class SAP extends JFrame {
         public static int selected;
-    public SAP(int option){
+        public static String[] things;
+        public static ReadWrite rw;
         
+    public SAP(int option, String[] actlist){
         super("Personal Trainer");
         JPanel background = new JPanel();
         background.setLayout(new BoxLayout(background, BoxLayout.PAGE_AXIS));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(500,400);
-        selected = option;
-        
         background.setBackground(Color.yellow);
         setLocationRelativeTo(null);
+        
+        selected = option;
+        things = actlist;
+        rw = new ReadWrite();
         
         background.add(Box.createVerticalGlue());
         JPanel namesLayout = new JPanel();
         namesLayout.setLayout(new BoxLayout(namesLayout, BoxLayout.PAGE_AXIS));
         namesLayout.setBackground(Color.yellow);
         namePress namepress = new namePress();
-        String[] names = {"David", "Preston", "Jeremy"};
+        String[] names = rw.getNames();
         for (int i = 0; i < names.length; i++){
             final JButton[] listofnames = new JButton[names.length];
             listofnames[i] = new JButton(names[i]);
@@ -154,7 +166,11 @@ class SAP extends JFrame {
         background.add(exit);
         exit.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                new PT();
+                try {
+                    new PT();
+                } catch (FileNotFoundException ex) {
+                    System.out.println("File not found");
+                }
                 dispose();
             }});
         background.add(Box.createVerticalGlue());
@@ -169,13 +185,13 @@ class SAP extends JFrame {
     System.out.println(e.getActionCommand());
     System.out.println(selected);
     if (selected == 1){
-        new MakePlan(e.getActionCommand());
+        new MakePlan(e.getActionCommand(), things);
         dispose();
      }
-    else if (selected == 2){
-        new ViewRatings(e.getActionCommand());
-        dispose();
-        }
+    /*else if (selected == 2){
+    new ViewRatings(e.getActionCommand());
+    dispose();
+    }*/
     else if (selected == 3){
         new ViewPlans(e.getActionCommand());
         dispose();
@@ -186,25 +202,29 @@ class SAP extends JFrame {
     
 
 class MakePlan extends JFrame{
-    
-    public MakePlan(String name){
+        public static String[] things;
+        public static ReadWrite rw;
+        
+        
+    public MakePlan(String name, String[] actlist){
         super("Make Exercise Plan"); //title
+        setSize(700,600);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        
+        things = actlist;
+        rw = new ReadWrite();
+        
         final SpinnerDateModel datemodel = new SpinnerDateModel(new Date(), null, null,
                                                             Calendar.DAY_OF_WEEK);
         final DateFormat dateformat = new SimpleDateFormat("dd MMM yyyy");
-        
-        String name1 = "David";  //Demo test string
-        setSize(400,300);
-        
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         
         JPanel background = new JPanel();
         background.setLayout(new BoxLayout(background, BoxLayout.PAGE_AXIS));
         add(background);
         
         //List of plans title
-        JLabel plans = new JLabel("List of Plans for " + name1);
+        JLabel plans = new JLabel("List of Plans for " + name);
         plans.setAlignmentX(Component.CENTER_ALIGNMENT);
         background.add(plans);
         
@@ -212,58 +232,39 @@ class MakePlan extends JFrame{
         JPanel lopPane = new JPanel();
         lopPane.setLayout(new FlowLayout());
         JScrollPane lopScroll = new JScrollPane(lopPane);
-        
-        JPanel lopBox = new JPanel();
-        lopBox.setLayout(new BoxLayout(lopBox, BoxLayout.PAGE_AXIS));
-        String dateBox[] = {"10/25/16", "Tue" };
-        JTextArea[] db = new JTextArea[2];
-        for(int i = 0; i < dateBox.length; i++)
-            {
-            db[i] = new JTextArea(1,10);
-            db[i].setText(dateBox[i]);
-            db[i].setEditable(false);
-            lopBox.add(db[i]);
-           }
-        lopPane.add(lopBox);
-        
-        JPanel timeBox = new JPanel();
-        timeBox.setLayout(new BoxLayout(timeBox, BoxLayout.PAGE_AXIS));
-        JTextArea timeLOP = new JTextArea(1, 10);
-        timeLOP.setEditable(false);
-       
-        String times[] = {"12:00 PM", "12:10 PM", "12:50 PM"};
-        JTextArea[] tb = new JTextArea[3];
-        for(int i = 0; i < times.length; i++)
-            {
-            tb[i] = new JTextArea(1,10);
-            tb[i].setText(times[i]);
-            tb[i].setEditable(false);
-            timeBox.add(tb[i]);
-           }
-        lopPane.add(timeBox);
-        
-        JPanel lopBoxRight = new JPanel();
-        lopBoxRight.setLayout(new BoxLayout(lopBoxRight, BoxLayout.PAGE_AXIS));
-        String lops[] = {"Warmup", "Running", "Cooldown"};
-        JTextArea[] lb = new JTextArea[3];
-        for(int i = 0; i < 3; i++)
-            {
-            lb[i] = new JTextArea(1,10);
-            lb[i].setText(lops[i]);
-            lb[i].setEditable(false);
-            lopBoxRight.add(lb[i]);   
-            }
-        lopPane.add(lopBoxRight);
         background.add(lopScroll);
+        //JTextField leftside = new JTextField(10);
+        JLabel leftside = new JLabel("10/25/16 Tue");
+        JTextArea rightside = new JTextArea(5,30);
+        lopPane.add(leftside);
+        lopPane.add(rightside);
+        rightside.setEditable(false);
+        rightside.setText("\tSample Plan\n\t12:00 PM\tWarm-up\n\t12:10 PM\tRunning\n\t12:50 PM\tCooldown");
         
+        JPanel weightPane = new JPanel();
+        weightPane.setLayout(new FlowLayout());
+        background.add(weightPane);
+        JLabel weightLabel = new JLabel("Last recorded weight:");
+        weightPane.add(weightLabel);
+        JTextField weightText = new JTextField(4);
+        weightText.setEditable(false);
+        weightText.setText("205");
+        weightPane.add(weightText);
         
-        final JPanel dowdisplay = new JPanel();
+        JLabel weightgoaldisplay = new JLabel("Weight goal:");
+        weightPane.add(weightgoaldisplay);
+        JTextField weightgoalText = new JTextField(4);
+        weightgoalText.setEditable(false);
+        weightgoalText.setText("190");
+        weightPane.add(weightgoalText);
+        
+        JPanel dowdisplay = new JPanel();
         FlowLayout dowLayout = new FlowLayout();
         dowdisplay.setLayout(dowLayout);
         JLabel date = new JLabel("Date: ");
         dowdisplay.add(date);
         
-        final JSpinner datespinner = new JSpinner(datemodel);
+        JSpinner datespinner = new JSpinner(datemodel);
         JSpinner.DateEditor dateeditor = new JSpinner.DateEditor(datespinner, "dd MMM yyyy");
         JFormattedTextField datetextfield = dateeditor.getTextField();
         datetextfield.setEditable(false);
@@ -272,7 +273,8 @@ class MakePlan extends JFrame{
         
         JLabel dowtitle = new JLabel("Day of the Week: ");
         dowdisplay.add(dowtitle);
-        final JTextArea dowspace = new JTextArea(1,5);
+        JTextArea dowspace = new JTextArea(1,5);
+        dowspace.setEditable(false);
         dowspace.setText(datespinner.getValue().toString().substring( 0, 3));
         dowdisplay.add(dowspace);
         
@@ -298,8 +300,8 @@ class MakePlan extends JFrame{
         timedisplay.add(new JLabel(":"));
         
         SpinnerNumberModel secmodel = new SpinnerNumberModel(0, 0, 59, 1);
-        JSpinner sec = new JSpinner(secmodel);
-        timedisplay.add(sec);
+        JSpinner min = new JSpinner(secmodel);
+        timedisplay.add(min);
         
         String[] ampm = { "AM", "PM" };
         JComboBox ampmlist = new JComboBox(ampm);
@@ -313,24 +315,111 @@ class MakePlan extends JFrame{
         timeLayout.setHgap(10);
         JLabel activity = new JLabel("Activity: ");
         activitydisplay.add(activity);
-        String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
-            "Sit-ups", "Warm-up", "Weights" };
         JComboBox thingslist = new JComboBox(things);
         activitydisplay.add(thingslist);
+        
         background.add(activitydisplay);
+        background.add(Box.createVerticalGlue());
         
-        JTextField statustxt = new JTextField(20);
-        statustxt.setHorizontalAlignment(JTextField.CENTER);
-        statustxt.setEditable(false);
-        statustxt.setText("Standing by to create plan");
+        JPanel DataEntryPane = new JPanel();
+        DataEntryPane.setLayout(new FlowLayout());
+        JButton keepdate = new JButton("Keep Current Date but Start Over");
+        JButton enter = new JButton("Enter Data into Exercise Plan Above");
+        JButton restart = new JButton("Clear All and Start Over");
         
-        //Enter button
-        JButton enter = new JButton("Enter: ");
-        enter.setAlignmentX(Component.CENTER_ALIGNMENT);
-        background.add(enter);
+        DataEntryPane.add(keepdate);
+        DataEntryPane.add(enter);
+        DataEntryPane.add(restart);
+        background.add(DataEntryPane);
+        background.add(Box.createVerticalGlue());
+        
+        JPanel bottomPane = new JPanel();
+        bottomPane.setLayout(new FlowLayout());
+        JPanel bottomleftPane = new JPanel();
+        bottomleftPane.setLayout(new BoxLayout(bottomleftPane, BoxLayout.Y_AXIS));
+        JPanel bottommiddlePane = new JPanel();
+        bottommiddlePane.setLayout(new BoxLayout(bottommiddlePane, BoxLayout.Y_AXIS));
+        JPanel bottomrightPane = new JPanel();
+        bottomrightPane.setLayout(new BoxLayout(bottomrightPane, BoxLayout.Y_AXIS));
+        
+        JLabel actDescripLabel = new JLabel("Activity Description");
+        actDescripLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JTextArea actDescrip = new JTextArea(5, 20);
+        JScrollPane actDescriPane = new JScrollPane(actDescrip);
+        actDescrip.setEditable(false);
+        bottomleftPane.add(actDescripLabel);
+        bottomleftPane.add(actDescriPane);
+        
+        JLabel prefDescripLabel = new JLabel("Personal Preferences");
+        prefDescripLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JTextArea prefDescrip = new JTextArea(5, 20);
+        JScrollPane prefDescriPane = new JScrollPane(prefDescrip);
+        prefDescrip.setEditable(false);
+        bottommiddlePane.add(prefDescripLabel);
+        bottommiddlePane.add(prefDescriPane);
+        
+        JLabel ratDescripLabel = new JLabel("Personal Activity Ratings");
+        ratDescripLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JTextArea ratDescrip = new JTextArea(5, 20);
+        JScrollPane ratDescriPane = new JScrollPane(ratDescrip);
+        ratDescrip.setEditable(false);
+        bottomrightPane.add(ratDescripLabel);
+        bottomrightPane.add(ratDescriPane);
+        
+        bottomPane.add(bottomleftPane);
+        bottomPane.add(bottommiddlePane);
+        bottomPane.add(bottomrightPane);
+        background.add(bottomPane);
+        background.add(Box.createVerticalGlue());
+        
+        keepdate.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                rightside.setText("");
+            }});
+        
         enter.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
+                try { 
+                    int start = rightside.getLineStartOffset(rightside.getLineCount()- 1);
+                    int end = rightside.getLineEndOffset(rightside.getLineCount()- 1);
+                    System.out.println(rightside.getText(start, end-start));
+                } catch (BadLocationException ex) {
+                    System.out.println("Previous line doesn't exist.");
+                }
+                String emptyitem = "";
+                String emptyhour = "";
+                String emptyampm = "";
+                String minconvert = "";
+                if (rightside.getText().contains("Sample"))
+                    rightside.setText("");
+                if (timelist.getSelectedItem()==null)
+                    emptyhour = "1";
+                else 
+                    emptyhour = (String)(timelist.getSelectedItem());
+                if ((int)min.getValue() < 10)
+                    minconvert = "0"+min.getValue().toString();
+                else
+                    minconvert = min.getValue().toString();
+                if (ampmlist.getSelectedItem()==null)
+                    emptyampm = "AM";
+                else
+                    emptyampm = (String)(ampmlist.getSelectedItem());
+                if (thingslist.getSelectedItem() == null)
+                    emptyitem = things[0];
+                else
+                    emptyitem = (String)thingslist.getSelectedItem();
+                
+                leftside.setText(datespinner.getValue().toString().substring(4,10)+","+
+                        (datespinner.getValue().toString().substring(24,28))+"  "+
+                        (datespinner.getValue().toString().substring(0,3)));
+                
+                rightside.append("\t"+emptyhour+":"+minconvert+" "+emptyampm);
+                rightside.append("\t"+emptyitem+"\n");
+                dowdisplay.remove(date);
                 dowdisplay.remove(datespinner);
+                dowdisplay.remove(dowtitle);
+                dowdisplay.remove(dowspace);
+                
             }});
         
         //Save button
@@ -342,20 +431,69 @@ class MakePlan extends JFrame{
         JButton save = new JButton("Save and Exit");
         save.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                System.out.println("Save");
+                try {
+                        PrintWriter textwriter = null;
+                        String yearstring = datespinner.getValue().toString().substring(24,28);
+                        String monthstring = datespinner.getValue().toString().substring(4,7);
+                        File year = new File("S://"+name+"/XP/"+yearstring);
+                        if (!year.exists())
+                            year.mkdir();
+                        File month = new File("S://"+name+"/"+yearstring+"/XP/"+
+                                rw.monthDetermine(monthstring));
+                        if (!month.exists())
+                            month.mkdir();
+                        String filename = "S://"+name+"/"+yearstring+
+                                "/XP/"+rw.monthDetermine(monthstring)+"/"
+                                +datespinner.getValue().toString().substring(8,10)+".txt";
+                        System.out.println(filename);
+                        textwriter= new PrintWriter(filename, "UTF-8");
+                        rightside.write(textwriter);
+                        textwriter.close();
+                        new PT();
+                    } catch (FileNotFoundException ex) {
+                        System.out.println("File not found");
+                    } catch (IOException ex) {
+                        System.out.println("Save button for modify");
+                    }
+                    
+                dispose();
             }});
         
         //Exit button
         JButton exit = new JButton("Exit to Personal Trainer Main Menu");
         exit.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                new PT();
+                try {
+                    new PT();
+                } catch (FileNotFoundException ex) {
+                    System.out.println("File not found");
+                }
                 dispose();
             }});
+        
+        restart.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                new MakePlan(name, things);
+                dispose(); 
+            }});
+        
+        thingslist.addActionListener (new ActionListener () {
+            public void actionPerformed(ActionEvent e) {
+                actDescrip.setText("");
+                FileReader reader = null;
+                try {
+                    reader = new FileReader("S://Activities/"+thingslist.getSelectedItem()+".txt");
+                    actDescrip.read(reader, background);
+                } 
+                catch (IOException exception) {
+                    System.err.println("Load error");
+                }
+                }
+            });
         bottomdisplay.add(save);
         bottomdisplay.add(exit);
         background.add(bottomdisplay);
-        background.add(statustxt);
+        //background.add(statustxt);
         
         //pack();
         setVisible(true);
@@ -364,15 +502,20 @@ class MakePlan extends JFrame{
     
 }
  class ViewPlans extends JFrame{
-        public static String name;
-    public ViewPlans(final String name){
-        super("View Exercise Plans");
-        //setLayout(new FlowLayout());
-        setSize(500,400);
+        public static ReadWrite rw;
+        public static String[] montharray;
+        public static String[] dayarray;
+        public static String monthFile;
         
+    public ViewPlans(String name){
+        super("View Exercise Plans");
+        setSize(500,400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         
+        rw = new ReadWrite();
+        rw.createNewFiles(name);
+                
         JPanel background = new JPanel();
         background.setLayout(new BoxLayout(background, BoxLayout.Y_AXIS));
         add(background);
@@ -382,8 +525,7 @@ class MakePlan extends JFrame{
         JLabel op = new JLabel("Old Plans for");
         op.setAlignmentX(Component.CENTER_ALIGNMENT);
         toptitle.add(op);
-        String x = "David"; //Demo sample name
-        JLabel titlename = new JLabel(x);
+        JLabel titlename = new JLabel(name);
         toptitle.add(titlename);
         background.add(toptitle);
         
@@ -403,95 +545,165 @@ class MakePlan extends JFrame{
         FlowLayout lopLayout = new FlowLayout();
         lopPane.setLayout(lopLayout);
         JScrollPane lopScroll = new JScrollPane(lopPane);
-        
-        JPanel lopBox = new JPanel();
-        lopBox.setLayout(new BoxLayout(lopBox, BoxLayout.PAGE_AXIS));
-        String dateBox[] = {"10/25/16", "Tue" };
-        JTextArea[] db = new JTextArea[2];
-        for(int i = 0; i < dateBox.length; i++)
-            {
-            db[i] = new JTextArea(1,5);
-            db[i].setText(dateBox[i]);
-            db[i].setEditable(false);
-            lopBox.add(db[i]);
-           }
-        lopPane.add(lopBox);
-        
-        JPanel timeBox = new JPanel();
-        timeBox.setLayout(new BoxLayout(timeBox, BoxLayout.PAGE_AXIS));
-        JTextArea timeLOP = new JTextArea(1, 10);
-        timeLOP.setEditable(false);
-       
-        String times[] = {"12:00 PM", "12:10 PM", "12:50 PM"};
-        JTextArea[] tb = new JTextArea[3];
-        for(int i = 0; i < 3; i++){
-            tb[i] = new JTextArea(1,5);
-            tb[i].setText(times[i]);
-            tb[i].setEditable(false);
-            timeBox.add(tb[i]);
-        }
-        lopPane.add(timeBox);
-        
-        JPanel lopMiddleBox = new JPanel();
-        lopMiddleBox.setLayout(new BoxLayout(lopMiddleBox, BoxLayout.PAGE_AXIS));
-        JTextArea lopLOP = new JTextArea(1, 10);
-        String lops[] = {"Warmup", "Running", "Cooldown"};
-        JTextArea[] lb = new JTextArea[3];
-        for(int i = 0; i < 3; i++)
-            {
-            lb[i] = new JTextArea(1,10);
-            lb[i].setText(lops[i]);
-            lb[i].setEditable(false);
-            lopMiddleBox.add(lb[i]);   
-            }
-        lopPane.add(lopMiddleBox);
         background.add(lopScroll);
         
-        JPanel cyclePane = new JPanel();
-        cyclePane.setLayout(new FlowLayout());
-        JButton plus = new JButton("+");
-        plus.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                System.out.println("plus pressed");
-            }});
-        cyclePane.add(plus);
-        JLabel cycletitle = new JLabel("Cycle through Old Plans");
-        cyclePane.add(cycletitle);
-        JButton minus = new JButton("--");
-        minus.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                System.out.println("minus pressed");
-            }});
-        cyclePane.add(minus);
-        background.add(cyclePane);
+        JLabel leftside = new JLabel("10/25/16 Tue");
+        JTextArea rightside = new JTextArea(5,30);
+        lopPane.add(leftside);
+        lopPane.add(rightside);
+        rightside.setEditable(false);
+        rightside.setText("\tSample Plan\n\t12:00 PM\tWarm-up\n\t12:10 PM\tRunning\n\t12:50 PM\tCooldown");
         
-        JButton modify = new JButton("Modify Plans");
-        modify.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                dispose();
-                new Modify(name);
-            }});
+        int x = 4;
+        JLabel ratingValue = new JLabel("Rating is "+Integer.toString(x));
+        ratingValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+        background.add(ratingValue);
         
+        JLabel yeartitle = new JLabel("Choose an available year");
+        JPanel yeardisplay = new JPanel();
+        FlowLayout yearLayout = new FlowLayout();
+        yeardisplay.setLayout(yearLayout);
+        yearLayout.setHgap(10);
+        yeardisplay.add(yeartitle);
+        String[] yeararray = rw.getYear(name); //Gets list of years in directory
+        JComboBox yearlist = new JComboBox(yeararray);
+        yeardisplay.add(yearlist);
+        background.add(yeardisplay);
+        yearlist.addActionListener(yearlist);
+        
+        JLabel monthtitle = new JLabel("Choose an available month");
+        JPanel monthdisplay = new JPanel();
+        FlowLayout monthLayout = new FlowLayout();
+        monthdisplay.setLayout(monthLayout);
+        monthLayout.setHgap(10);
+        monthdisplay.add(monthtitle);
+        montharray = rw.getMonths(name, yearlist.getSelectedItem().toString());//Gets list of months
+        JComboBox monthlist = new JComboBox(montharray);
+        
+        monthdisplay.add(monthlist);
+        background.add(monthdisplay);
+        
+        JLabel daytitle = new JLabel("Choose an available day");
+        JPanel daydisplay = new JPanel();
+        FlowLayout dayLayout = new FlowLayout();
+        daydisplay.setLayout(yearLayout);
+        dayLayout.setHgap(10);
+        daydisplay.add(daytitle);
+        
+        monthFile = Integer.toString(rw.monthDetermine((monthlist.getSelectedItem().toString())));
+        dayarray = rw.getDays(name, yearlist.getSelectedItem().toString(), 
+               monthFile);//Gets list of days in months file
+        
+        JComboBox daylist = new JComboBox(dayarray);
+        daydisplay.add(daylist);
+        background.add(daydisplay);
+        
+        
+        JButton modify = new JButton("Modify This Plan");
+        JButton save = new JButton("Save This Plan and Edit Another");
         JButton exit = new JButton("Exit to Personal Trainer Main Menu");
-        exit.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                dispose();
-                new PT();
-            }});
         
         JPanel MVP = new JPanel(new FlowLayout());
-        MVP.add(modify);
+        background.add(modify);
+        MVP.add(save);
         MVP.add(exit);
         background.add(MVP);
-        //pack();
+        JTextArea status = new JTextArea(1,20);
+        status.setAlignmentX(Component.CENTER_ALIGNMENT);
+        background.add(status);
+        
+        
+        yearlist.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                
+                monthlist.setModel(new DefaultComboBoxModel(rw.getMonths(name, 
+                        yearlist.getSelectedItem().toString())));
+                monthFile = Integer.toString(rw.monthDetermine((monthlist.getSelectedItem().toString())));
+                
+                daylist.setModel(new DefaultComboBoxModel(rw.getDays(name, 
+                        yearlist.getSelectedItem().toString(),monthFile)));
+              }
+        });
+        monthlist.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                monthFile = Integer.toString(rw.monthDetermine((monthlist.getSelectedItem().toString())));
+                status.setText(monthFile);
+                daylist.setModel(new DefaultComboBoxModel(rw.getDays(name, 
+                        yearlist.getSelectedItem().toString(),monthFile)));
+              }
+        });
+        daylist.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                rightside.setText("");
+                leftside.setText(monthlist.getSelectedItem().toString()+" "
+                        +daylist.getSelectedItem().toString()+", "+
+                        yearlist.getSelectedItem().toString());
+                
+                ratingValue.setText("Rating is "+Integer.toString(5));
+                try{
+                String text = rw.getXPlan(name, yearlist.getSelectedItem().toString(),
+                        monthlist.getSelectedItem().toString(), daylist.getSelectedItem().toString());
+                rightside.setText(text);
+                }
+                catch (IOException ex) {
+                    System.out.println("File does not Exist");
+                }
+        }});
+        
+        
+        
+        
+        modify.setAlignmentX(Component.CENTER_ALIGNMENT);
+        modify.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                rightside.setEditable(true);
+                }});
+        
+        save.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+            try {
+                PrintWriter textwriter = null;
+                String dayFile;
+                if (daylist.getSelectedItem() == null)
+                    dayFile = "00";
+                else 
+                    dayFile = daylist.getSelectedItem().toString();
+                
+                String filename = "S://"+name+"/XP/"+yearlist.getSelectedItem().toString()+
+                    "/"+monthFile+"/"+dayFile+".txt";
+                    
+                System.out.println(filename);
+                textwriter= new PrintWriter(filename, "UTF-8");
+                rightside.write(textwriter);
+                textwriter.close();
+                } catch (FileNotFoundException ex) {
+                  System.out.println("File not found");
+                } catch (IOException ex) {
+                  System.out.println("Save button for modify");
+                }
+                new ViewPlans(name);
+                dispose();
+            }});
+        
+        exit.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                try {
+                    new PT();
+                } catch (FileNotFoundException ex) {
+                    System.out.println("File not found");
+                }
+                dispose();
+            }});
+        
         setVisible(true);
         
     }
+        
 }
     class Modify extends JFrame{
         public static String name;
         
-        public Modify (final String name){
+        public Modify (String name){
             super("Modify Exercise Plans");
             
             setSize(500,400);
@@ -508,8 +720,7 @@ class MakePlan extends JFrame{
             JLabel changes = new JLabel("Make Changes for");
             changes.setAlignmentX(Component.CENTER_ALIGNMENT);
             toptitle.add(changes);
-            String x = "David"; //Demo sample name
-            JLabel titlename = new JLabel(x);
+            JLabel titlename = new JLabel(name);
             toptitle.add(titlename);
             background.add(toptitle);
             
@@ -595,8 +806,12 @@ class MakePlan extends JFrame{
         exit.setAlignmentX(Component.CENTER_ALIGNMENT);
         exit.addActionListener(new ActionListener(){
         public void actionPerformed(ActionEvent e){
-                dispose();
+            try {
                 new PT();
+            } catch (FileNotFoundException ex) {
+                System.out.println("File not found");
+            }
+            dispose();
             }});
         
         MVP1.add(save);
@@ -610,137 +825,20 @@ class MakePlan extends JFrame{
         setVisible(true);
         }
     }
- class ViewRatings extends JFrame{
-        public static String name;
-    public ViewRatings(String name){
-        super("View Exercise Ratings");
-        setSize(500,400);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        
-        
-        JPanel background = new JPanel();
-        background.setLayout(new BoxLayout(background, BoxLayout.PAGE_AXIS));
-        add(background);
-        
-        //Title of Page
-        JPanel toptitle = new JPanel();
-        toptitle.setLayout(new FlowLayout());
-        JLabel list = new JLabel("List of Activities rated for ");
-        list.setAlignmentX(Component.CENTER_ALIGNMENT);
-        toptitle.add(list);
-        
-        String x = "David"; //Demo sample name
-        JLabel titlename = new JLabel(x);
-        toptitle.add(titlename);
-        background.add(toptitle);
-        
-        
-        //Exercise & Rating titles
-        FlowLayout ratingsLayout = new FlowLayout();
-        JPanel ratingstitle = new JPanel();
-        ratingstitle.setLayout(ratingsLayout);
-        ratingsLayout.setHgap(40);
-        
-        JLabel exercise = new JLabel("Exercise");
-        ratingstitle.add(exercise);
-        
-        JLabel ratings = new JLabel("Rating");
-        ratingstitle.add(ratings);
-        background.add(ratingstitle);
-        
-        //Demo string
-        String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
-            "Sit-ups", "Warm-up", "Weights" };
-        
-        //List of Exercise & Ratings Display
-        FlowLayout lopTopLayout = new FlowLayout();
-        JPanel lopTop = new JPanel();
-        lopTop.setLayout(lopTopLayout);
-        lopTopLayout.setHgap(50);
-        
-        //Setup Boxlayout for lop displays
-        JPanel lopBottomLeft = new JPanel();
-        lopBottomLeft.setLayout(new BoxLayout(lopBottomLeft, BoxLayout.PAGE_AXIS));
-        JTextArea[] prefsarray = new JTextArea[3];
-        for(int i = 0; i < 3; i++){
-            {
-            prefsarray[i] = new JTextArea(1,5);
-            prefsarray[i].setText(things[i]);
-            prefsarray[i].setEditable(false);
-            lopBottomLeft.add(prefsarray[i]);   
-            }
-        }
-        lopTop.add(lopBottomLeft);
-        JPanel lopBottomRight = new JPanel();
-        lopBottomRight.setLayout(new BoxLayout(lopBottomRight, BoxLayout.PAGE_AXIS));
-        String [] nums = {"5","3","4"};//Demo string representing ratings
-        JTextArea[] ratingsarray = new JTextArea[3];
-        for(int i = 0; i < 3; i++){
-            ratingsarray[i] = new JTextArea(1,5);
-            ratingsarray[i].setText(nums[i]);
-            ratingsarray[i].setEditable(false);
-            lopBottomRight.add(ratingsarray[i]);
-        }
-        lopTop.add(lopBottomRight);
-        background.add(lopTop);
-        
-        JPanel ratinglist = new JPanel();
-        BorderLayout rLayout = new BorderLayout();
-        ratinglist.setLayout(rLayout);
-        rLayout.setHgap(30);
-        
-        JComboBox thingslist = new JComboBox(things);
-        JScrollPane thingsPane = new JScrollPane(thingslist);
-        ratinglist.add(thingsPane, BorderLayout.WEST);
-        ratinglist.add(thingsPane);
-        
-        //Setup Preferences box
-        JLabel preferences = new JLabel("Preferences");
-        preferences.setAlignmentX(Component.CENTER_ALIGNMENT);
-        background.add(preferences, BorderLayout.EAST);
-        
-        JTextArea prefs = new JTextArea(5, 20);
-        prefs.setText("Prefers to exercise on Monday & Wednesday in the afternoon\nDoesn't like to run"
-                + " but prefers the treadmill. \nLimit exercise to no more than 75 minutes.");
-        JScrollPane prefPane = new JScrollPane(prefs);
-        prefs.setEditable(true);
-        background.add(prefPane);
-        
-        JPanel bottomlist = new JPanel();
-        FlowLayout bottomLayout = new FlowLayout();
-        ratinglist.setLayout(bottomLayout);
-        bottomLayout.setHgap(30);
-        
-        //Exit Button
-        JButton exit = new JButton("Exit to Personal Trainer Main Menu");
-            exit.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                dispose();
-                new PT();
-            }});
-          
-        bottomlist.add(exit);
-        background.add(bottomlist);
-        setVisible(true);
-        //pack();
-       
-    }
-    
-}
+ 
  class ViewActivities extends JFrame{
-     
-    public ViewActivities(final String[] things){
+        public static String[] things;
+    public ViewActivities(String[] actlist){
         super("View Exercise Activities");
         setSize(500,400);
         
+        things = actlist;
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         
         JPanel background = new JPanel();
         background.setLayout(new BoxLayout(background, BoxLayout.PAGE_AXIS));
         add(background);
-        
         
         JLabel list = new JLabel("List of Activities");
         list.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -765,7 +863,7 @@ class MakePlan extends JFrame{
         modify.setAlignmentX(Component.CENTER_ALIGNMENT);
         modify.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                new ModifySelect();
+                new ModifySelect(things);
                 dispose();
             }});
         background.add(modify);
@@ -775,7 +873,11 @@ class MakePlan extends JFrame{
         exit.setAlignmentX(Component.CENTER_ALIGNMENT);
         exit.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-               new PT(); 
+                try { 
+                    new PT();
+                } catch (FileNotFoundException ex) {
+                    System.out.println("File not found");
+                }
                dispose();
             }});
         background.add(exit);
@@ -785,9 +887,12 @@ class MakePlan extends JFrame{
     
 }
     class Create extends JFrame {
-        
-        public Create(final String[] things){
+            public static String[] things;
+            public static ReadWrite rw;
+        public Create(String[] actlist){
             super("Create Exercise Activities");
+            things = actlist;
+            rw = new ReadWrite();
             setSize(500,400);
             
             setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -800,8 +905,7 @@ class MakePlan extends JFrame{
             JLabel list = new JLabel("List of Activities");
             list.setAlignmentX(Component.CENTER_ALIGNMENT);
             background.add(list);
-            //String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
-            //   "Sit-ups", "Warm-up", "Weights" };
+            
             JList thingslist = new JList(things);
             JScrollPane thingsPane = new JScrollPane(thingslist);
             background.add(thingsPane);
@@ -810,7 +914,7 @@ class MakePlan extends JFrame{
             JLabel name = new JLabel("Name of Activity: ");
             namePane.add(name);
             
-            final JTextField namefield = new JTextField(20);
+            JTextField namefield = new JTextField(20);
             namefield.setEditable(true);
             namefield.setText("Elliptical");
             namePane.add(namefield);
@@ -837,33 +941,48 @@ class MakePlan extends JFrame{
             bottomlist.setLayout(bottomLayout);
             bottomLayout.setHgap(30);
         
-            JButton save = new JButton("Save Changes and Exit");
+            JButton save = new JButton("Save List and Exit");
             JButton exit = new JButton("Exit to Personal Trainer Main Menu");
                 exit.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
-                    new PT();
+                    try {
+                        new PT();
+                    } catch (FileNotFoundException ex) {
+                        System.out.println("File not found");
+                    }
                     dispose();
                 }});
                 
-            final JTextField statustxt = new JTextField(20);
+            JTextField statustxt = new JTextField(20);
             statustxt.setHorizontalAlignment(JTextField.CENTER);
             statustxt.setEditable(false);
             statustxt.setText("Standing by to create plan");
             
             update.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
-                   boolean found = arrayCompare(namefield.getText(), things);
-                     if(found)
-                          statustxt.setText("That activity was added to the list");
-                      else
-                          statustxt.setText("That activity exists and was not added to the list");
-                    
-            }});
+                    String[] newlist;
+                    newlist = rw.arrayCompare(namefield.getText(), things);
+                    try {
+                        FileWriter textwriter = null;
+                        textwriter= new FileWriter("S://Activities/"+namefield.getText()+".txt");
+                        descriptext.write(textwriter);
+                    } catch (IOException ex) {
+                        System.out.println("Save button for modify");
+                    }
+                    new Create(newlist);
+                    dispose();
+                    }});
             
             save.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
-                    
-            }});
+                   rw.WriteArray(things);
+                    try {
+                        new PT();
+                        dispose();
+                    } catch (FileNotFoundException ex) {
+                        System.out.println("File could not be saved.");
+                    }
+                }});
             
             bottomlist.add(save);    
             bottomlist.add(exit);
@@ -875,37 +994,17 @@ class MakePlan extends JFrame{
             
     
         }
-        private boolean arrayCompare(String n, String[] list){
-            int j = 0;
-            for (int i = 0; i < list.length; i++){
-                if (n.equalsIgnoreCase(list[i])){
-                    return false; 
-                    
-                }
-                if (n.compareToIgnoreCase(list[i])>1)
-                    j++;
-                    
-                }
-            String[] listnew = new String[list.length+1];
-            for (int i = 0; i < j; i++){
-                listnew[i]=list[i];
-            }
-            listnew[j]=n;
-            
-            for (int i = j+1; i < listnew.length; i++){
-                listnew[i]=list[i-1];
-            }
-            return true; 
-        }
-        
         
     }
     class ModifySelect extends JFrame{
-        
-        public ModifySelect(){
+            public static String[] things;
+            
+        public ModifySelect(String[] actlist){
             super("Modify Selected Activity");
             setLayout(new FlowLayout());
-            setSize(500,400);
+            setSize(700,600);
+            
+            things = actlist;
             
             setDefaultCloseOperation(EXIT_ON_CLOSE);
             setLocationRelativeTo(null);
@@ -917,38 +1016,84 @@ class MakePlan extends JFrame{
             JLabel list = new JLabel("List of Activities");
             list.setAlignmentX(Component.CENTER_ALIGNMENT);
             background.add(list);
-            String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
-                "Sit-ups", "Warm-up", "Weights" };
+            
             JList thingslist = new JList(things);
             thingslist.setVisibleRowCount(5);
             thingslist.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
             JScrollPane thingsPane = new JScrollPane(thingslist);
             background.add(thingsPane);
             
-            JLabel select = new JLabel("Select Exercise Activity and hit continue");
+            JLabel select = new JLabel("Select Exercise Activity and hit Modify Selected Item");
             select.setAlignmentX(Component.CENTER_ALIGNMENT);
             background.add(select);
+            background.add(Box.createVerticalGlue());
             
+            JLabel actDescripLabel = new JLabel("Activity Description");
+            actDescripLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            background.add(actDescripLabel);
+            JTextArea actDescrip = new JTextArea(5, 20);
+            JScrollPane actDescriPane = new JScrollPane(actDescrip);
+            actDescrip.setEditable(false);
+            background.add(actDescriPane);
+            
+            
+            thingslist.addListSelectionListener(new ListSelectionListener(){
+                public void valueChanged(ListSelectionEvent e){
+                    try {
+                    actDescrip.setText("");
+                    FileReader reader = null;
+                    reader = new FileReader("S://Activities/"+(String)thingslist.getSelectedValue()+".txt");
+                    actDescrip.read(reader, actDescriPane);
+                    } 
+                    catch (IOException exception) {
+                    System.err.println("Load error");
+                }}});
             
             JPanel bottomlist = new JPanel();
             FlowLayout bottomLayout = new FlowLayout();
             bottomlist.setLayout(bottomLayout);
             bottomLayout.setHgap(30);
-        
-            JButton cont = new JButton("Continue");
+            
+            JButton cont = new JButton("Modify Selected Item");
             cont.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
-                    new ModifyAct();
+                    if (thingslist.getSelectedValue()==null){
+                        new ModifySelect(things);
+                        dispose();
+                    }
+                    else{
+                        actDescrip.setEditable(true);
+                    }
+            }});
+            JButton save = new JButton("Save Changes and Exit");
+            save.addActionListener(new ActionListener(){
+                public void actionPerformed(ActionEvent e){
+                    try {
+                        FileWriter textwriter = null;
+                        textwriter= new FileWriter("S://Activities/"+(String)thingslist.getSelectedValue()+".txt");
+                        actDescrip.write(textwriter);
+                        new PT();
+                    } catch (FileNotFoundException ex) {
+                        System.out.println("File not found");
+                    } catch (IOException ex) {
+                        System.out.println("Save button for modify");
+                    }
                     dispose();
-                }});
-        
+            }});
+            
             JButton exit = new JButton("Exit to Personal Trainer Main Menu");
                 exit.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e){
-                    new PT();
+                    try {
+                        new PT();
+                    } catch (FileNotFoundException ex) {
+                        System.out.println("File not found");
+                    }
                     dispose();
                 }});
-            bottomlist.add(cont);    
+            
+            bottomlist.add(cont);
+            bottomlist.add(save);
             bottomlist.add(exit);
             background.add(bottomlist);
             
@@ -957,62 +1102,274 @@ class MakePlan extends JFrame{
         }
     }
 
-    class ModifyAct extends JFrame{
+class ReadWrite {
+        static String[] act;
+        static String[] names;
+        static List<String> listOfNames;
         
-        public ModifyAct(){
-            super("Modify Selected Activity");
-            
-            setSize(500,400);
-            
-            setDefaultCloseOperation(EXIT_ON_CLOSE);
-            setLocationRelativeTo(null);
-            String x = "Elliptical";
-            
-            JPanel background = new JPanel();
-            background.setLayout(new BoxLayout(background, BoxLayout.PAGE_AXIS));
-            add(background);
-            
-            
-            JLabel activity = new JLabel("Activity Name: " + x);
-            activity.setAlignmentX(Component.CENTER_ALIGNMENT);
-            background.add(activity);
-            
-            
-            JLabel description = new JLabel("Description");
-            description.setAlignmentX(Component.CENTER_ALIGNMENT);
-            background.add(description);
-            
-            JTextArea modactivity = new JTextArea(5, 20);
-            JScrollPane modactivitypane = new JScrollPane(modactivity);
-            modactivity.setEditable(true);
-            background.add(modactivitypane);
-            modactivity.setText("30 minutes \nSetting - Aerobic \n1.5 Miles \n150 calories.");
-            background.add(Box.createVerticalGlue());
-            
-            JPanel bottomlist = new JPanel();
-            FlowLayout bottomLayout = new FlowLayout();
-            bottomlist.setLayout(bottomLayout);
-            bottomLayout.setHgap(30);
         
-            JButton save = new JButton("Save Changes and Exit");
-            save.addActionListener(new ActionListener(){
-                public void actionPerformed(ActionEvent e){
-                    new PT();
-                    dispose();
-                }});
+    public String[] ReadArray() {
+        String str = ""; //Read each file from input
+        Scanner fin;
+        try {
+            File actdir = new File("S://Activities");
+            if (!actdir.exists()){
+                actdir.mkdir();
+                String[] tempacts = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
+                                    "Sit-ups", "Warm-up", "Weights" };
+                WriteArray(tempacts);
+                }
+            fin = new Scanner(new File("S://activities/activities.txt"));
+            int n = fin.nextInt(); //Reads 1st character which represents the
+        //number of string files to read
+        fin.nextLine();
         
-            JButton exit = new JButton("Exit to Personal Trainer Main Menu");
-                exit.addActionListener(new ActionListener(){
-                public void actionPerformed(ActionEvent e){
-                    new PT();
-                    dispose();
-                }});
-            bottomlist.add(save);    
-            bottomlist.add(exit);
-            background.add(bottomlist);
+        act = new String[n];
+        for (int i = 0; i<n; i++){
+          act[i]=fin.nextLine(); //Read a string input from file  
+          
+        }
+        
+        } catch (FileNotFoundException ex) {
+           System.out.println("File does not Exist"); 
+        }
+          catch (NullPointerException ex){
+            System.out.println("Can't create file.");
+        }
+        return act;
+     }
+    
+    public void WriteArray(String[] array){
+        try{
+            PrintWriter writer = null;
+            File actdir = new File("S://activities");
+            if (!actdir.exists()){
+                actdir.mkdir();
+            }
+            writer = new PrintWriter("S://activities/activities.txt", "UTF-8");
+            writer.println(array.length);
+            for (int i = 0; i < array.length; i++){
+                writer.println(array[i]);
+            }
+            writer.close();
+            } catch (Exception e) {
+                System.out.println("Activities could not be saved");
+            }
+        }
+    
+    public void createNewFiles(String name){
+        try {
             
-            //pack();
-            setVisible(true);
-             
+            File actMnthdir = new File("S://"+name+"/XP/2000/1");
+            if (!actMnthdir.exists()){
+                actMnthdir.mkdirs();
+            PrintWriter textwriter = new PrintWriter("S://"+name+"/XP/2000/1/01.txt");
+            textwriter.print("\tSample Plan\n" +"	12:00 PM	Warm-up\n" +
+                "	12:10 PM	Running\n"+"	12:50 PM	Cooldown");
+            textwriter.close();
+            }
+        }
+        
+        catch (NullPointerException ex){
+            System.out.println("Can't create file.");
+        }
+        catch (FileNotFoundException ex) {
+           System.out.println("File does not Exist"); 
         }
     }
+    public String[] arrayCompare(String n, String[] list){
+            int j = 0;
+            for (int i = 0; i < list.length; i++){
+                if (n.equalsIgnoreCase(list[i])){
+                    return list; 
+                }
+                if (n.compareToIgnoreCase(list[i]) > 0)
+                    j++;
+                else if (n.compareToIgnoreCase(list[i]) < 0)
+                    i = list.length;
+                
+                }
+            String[] listnew = new String[list.length+1];
+            for (int i = 0; i < j; i++){
+                listnew[i]=list[i];
+            }
+            listnew[j]=n;
+            
+            for (int i = j+1; i < listnew.length; i++){
+                listnew[i]=list[i-1];
+            }
+            return listnew; 
+        }
+    
+    public String[] getNames(){
+        listOfNames = new ArrayList<String>();
+        File[] files = new File("S://").listFiles();
+        for (File namenum : files) {
+            if (namenum.isDirectory()) {
+            File nameverify = new File (namenum+"/XP");
+            if (nameverify.exists())
+                listOfNames.add(namenum.getName());
+            
+        }
+    }
+        String[] names = new String[listOfNames.size()];
+        for (int i = 0; i < listOfNames.size(); i++){
+            listOfNames.toArray(names);
+        }
+        return names;
+    }
+    
+    public String[] getYear(String name){
+        try{
+        listOfNames = new ArrayList<String>();
+        File[] files = new File("S://"+name+"/XP/").listFiles();
+        for (File namenum : files) {
+            if (namenum.isDirectory()) {
+            listOfNames.add(namenum.getName());
+            
+        }
+    }
+        }
+        catch (NullPointerException ex){
+            createNewFiles(name);
+        }
+        names = new String[listOfNames.size()];
+        for (int i = 0; i < listOfNames.size(); i++){
+            listOfNames.toArray(names);
+        }
+        return arraySort(names);
+    }
+    public String[] getMonths(String name, String year){
+        listOfNames = new ArrayList<String>();
+        try {
+        File[] files = new File("S://"+name+"/XP/"+year).listFiles();
+        for (File namenum : files) {
+            if (namenum.isDirectory()) {
+            listOfNames.add(namenum.getName());
+        }
+    }
+        names = new String[listOfNames.size()];
+        
+        for (int i = 0; i < listOfNames.size(); i++){
+            listOfNames.toArray(names);
+        }
+        }
+        catch (NullPointerException ex){
+            createNewFiles(name);
+        }
+        names = arraySort(names);
+        for (int i = 0; i < names.length; i++){
+           
+           names[i]= monthnumDetermine(Integer.parseInt(names[i]));
+        }
+        return names;
+    }
+    
+    public String[] getDays(String name, String year, String month){
+        listOfNames = new ArrayList<String>();
+        try{
+        File[] files = new File("S://"+name+"/XP/"+year+"/"+month).listFiles();
+        for (File namenum : files) {
+            if (namenum.isFile()) {
+                listOfNames.add(namenum.getName().substring(0, 2));
+            
+                }
+            }
+        }
+        catch (NullPointerException ex){
+            createNewFiles(name);
+        }
+        String[] names = new String[listOfNames.size()];
+        for (int i = 0; i < listOfNames.size(); i++){
+            listOfNames.toArray(names);
+        }
+        return arraySort(names);
+    }
+    
+    public String getXPlan(String name, String year, String month, String day) throws FileNotFoundException{
+        String Xplan = "";
+        month = Integer.toString(monthDetermine(month));
+        try {
+        FileReader Xplanfile = new FileReader ("S://"+name+"/XP/"+year+"/"+month+"/"+day+".txt");
+        Xplan = new Scanner(Xplanfile).useDelimiter("\\Z").next();
+        }
+        catch (IOException ex) {
+        System.out.println("File does not Exist");
+        }
+        return Xplan;
+    }
+    
+    
+    public int monthDetermine(String month){
+        if (month.equalsIgnoreCase("Jan"))
+                return 1;
+        else if (month.equalsIgnoreCase("Feb"))
+                return 2;
+        else if (month.equalsIgnoreCase("Mar"))
+                return 3;
+        else if (month.equalsIgnoreCase("Apr"))
+                return 4;
+        else if (month.equalsIgnoreCase("May"))
+                return 5;
+        else if (month.equalsIgnoreCase("Jun"))
+                return 6;
+        else if (month.equalsIgnoreCase("Jul"))
+                return 7;
+        else if (month.equalsIgnoreCase("Aug"))
+                return 8;
+        else if (month.equalsIgnoreCase("Sep"))
+                return 9;
+        else if (month.equalsIgnoreCase("Oct"))
+                return 10;
+        else if (month.equalsIgnoreCase("Nov"))
+                return 11;
+        else if (month.equalsIgnoreCase("Dec"))
+                return 12;
+        return 1;
+    }
+    public String monthnumDetermine(int month){
+        if (month==1)
+            return "Jan";
+        if (month==2)
+            return "Feb";
+        if (month==3)
+            return "Mar";
+        if (month==4)
+            return "Apr";              
+        if (month==5)
+            return "May";
+        if (month==6)
+            return "Jun";
+        if (month==7)
+            return "Jul";
+        if (month==8)
+            return "Aug";  
+        if (month==9)
+            return "Sep";
+        if (month==10)
+            return "Oct";
+        if (month==11)
+            return "Nov";
+        if (month==12)
+            return "Dec";  
+        return "Jan";
+    }
+
+
+    private String[] arraySort (String[] ip){
+        int j=ip.length-1;
+        String large = "";
+        while (j>0){
+        for (int i = 0; i < j; i++){
+            if (Integer.parseInt(ip[i]) > Integer.parseInt(ip[i+1])){
+                large = ip[i];
+                ip[i] = ip[i+1];
+                ip[i+1] = large;
+               }
+        }
+        j--;
+        }
+        return ip;
+    }
+
+}
