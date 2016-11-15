@@ -3,7 +3,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.List;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.*;
@@ -17,7 +16,7 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
-import java.util.Scanner;
+import java.util.List;
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -33,15 +32,14 @@ public class MainPT {
         String name = "David";
         
         //String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
-        //    "Sit-ups", "Warm-up", "Weights" };//Demo equipment list
+        //   "Sit-ups", "Warm-up", "Weights" };//Demo equipment list
         
         
         new PT();
         //new SAP(0);
         //new ViewPlans(name);
         //new Modify(name);
-        //new ViewRatings(name);
-        //new MakePlan(name);
+        //new MakePlan(name, things);
         //new ViewActivities(things);
         //new Create(things);
         //new ModifySelect();
@@ -248,14 +246,29 @@ class MakePlan extends JFrame{
         weightPane.add(weightLabel);
         JTextField weightText = new JTextField(4);
         weightText.setEditable(false);
-        weightText.setText("205");
+        FileReader reader = null;
+                try {
+                    reader = new FileReader("C://"+name+"/"+name+"WeightPref.txt");
+                    weightText.read(reader, weightPane);
+                } 
+                catch (IOException exception) {
+                    System.err.println("Load error");
+                }
         weightPane.add(weightText);
         
+        
         JLabel weightgoaldisplay = new JLabel("Weight goal:");
-        weightPane.add(weightgoaldisplay);
         JTextField weightgoalText = new JTextField(4);
         weightgoalText.setEditable(false);
-        weightgoalText.setText("190");
+        reader = null;
+                try {
+                    reader = new FileReader("C://"+name+"/"+name+"WeightGoal.txt");
+                    weightgoalText.read(reader, weightPane);
+                } 
+                catch (IOException exception) {
+                    System.err.println("Load error");
+                }
+        weightPane.add(weightgoaldisplay);
         weightPane.add(weightgoalText);
         
         JPanel dowdisplay = new JPanel();
@@ -355,6 +368,14 @@ class MakePlan extends JFrame{
         JTextArea prefDescrip = new JTextArea(5, 20);
         JScrollPane prefDescriPane = new JScrollPane(prefDescrip);
         prefDescrip.setEditable(false);
+        reader = null;
+                try {
+                    reader = new FileReader("C://"+name+"/"+name+"ExercisePref.txt");
+                    prefDescrip.read(reader, bottommiddlePane);
+                } 
+                catch (IOException exception) {
+                    System.err.println("Load error");
+                }
         bottommiddlePane.add(prefDescripLabel);
         bottommiddlePane.add(prefDescriPane);
         
@@ -363,6 +384,14 @@ class MakePlan extends JFrame{
         JTextArea ratDescrip = new JTextArea(5, 20);
         JScrollPane ratDescriPane = new JScrollPane(ratDescrip);
         ratDescrip.setEditable(false);
+        reader = null;
+                try {
+                    reader = new FileReader("C://"+name+"/"+name+"ExerciseRatings.txt");
+                    ratDescrip.read(reader, bottomrightPane);
+                } 
+                catch (IOException exception) {
+                    System.err.println("Load error");
+                }
         bottomrightPane.add(ratDescripLabel);
         bottomrightPane.add(ratDescriPane);
         
@@ -435,15 +464,15 @@ class MakePlan extends JFrame{
                         PrintWriter textwriter = null;
                         String yearstring = datespinner.getValue().toString().substring(24,28);
                         String monthstring = datespinner.getValue().toString().substring(4,7);
-                        File year = new File("S://"+name+"/XP/"+yearstring);
+                        File year = new File("C://"+name+"/XP/"+yearstring);
                         if (!year.exists())
-                            year.mkdir();
-                        File month = new File("S://"+name+"/"+yearstring+"/XP/"+
+                            year.mkdirs();
+                        File month = new File("C://"+name+"/XP/"+yearstring+"/"+
                                 rw.monthDetermine(monthstring));
                         if (!month.exists())
                             month.mkdir();
-                        String filename = "S://"+name+"/"+yearstring+
-                                "/XP/"+rw.monthDetermine(monthstring)+"/"
+                        String filename = "C://"+name+"/XP/"+yearstring+"/"+
+                                rw.monthDetermine(monthstring)+"/"
                                 +datespinner.getValue().toString().substring(8,10)+".txt";
                         System.out.println(filename);
                         textwriter= new PrintWriter(filename, "UTF-8");
@@ -482,7 +511,7 @@ class MakePlan extends JFrame{
                 actDescrip.setText("");
                 FileReader reader = null;
                 try {
-                    reader = new FileReader("S://Activities/"+thingslist.getSelectedItem()+".txt");
+                    reader = new FileReader("C://Activities/"+thingslist.getSelectedItem()+".txt");
                     actDescrip.read(reader, background);
                 } 
                 catch (IOException exception) {
@@ -669,7 +698,7 @@ class MakePlan extends JFrame{
                 else 
                     dayFile = daylist.getSelectedItem().toString();
                 
-                String filename = "S://"+name+"/XP/"+yearlist.getSelectedItem().toString()+
+                String filename = "C://"+name+"/XP/"+yearlist.getSelectedItem().toString()+
                     "/"+monthFile+"/"+dayFile+".txt";
                     
                 System.out.println(filename);
@@ -964,7 +993,7 @@ class MakePlan extends JFrame{
                     newlist = rw.arrayCompare(namefield.getText(), things);
                     try {
                         FileWriter textwriter = null;
-                        textwriter= new FileWriter("S://Activities/"+namefield.getText()+".txt");
+                        textwriter= new FileWriter("C://Activities/"+namefield.getText()+".txt");
                         descriptext.write(textwriter);
                     } catch (IOException ex) {
                         System.out.println("Save button for modify");
@@ -1042,7 +1071,7 @@ class MakePlan extends JFrame{
                     try {
                     actDescrip.setText("");
                     FileReader reader = null;
-                    reader = new FileReader("S://Activities/"+(String)thingslist.getSelectedValue()+".txt");
+                    reader = new FileReader("C://Activities/"+(String)thingslist.getSelectedValue()+".txt");
                     actDescrip.read(reader, actDescriPane);
                     } 
                     catch (IOException exception) {
@@ -1070,7 +1099,7 @@ class MakePlan extends JFrame{
                 public void actionPerformed(ActionEvent e){
                     try {
                         FileWriter textwriter = null;
-                        textwriter= new FileWriter("S://Activities/"+(String)thingslist.getSelectedValue()+".txt");
+                        textwriter= new FileWriter("C://Activities/"+(String)thingslist.getSelectedValue()+".txt");
                         actDescrip.write(textwriter);
                         new PT();
                     } catch (FileNotFoundException ex) {
@@ -1101,25 +1130,22 @@ class MakePlan extends JFrame{
             setVisible(true);
         }
     }
-
 class ReadWrite {
         static String[] act;
         static String[] names;
         static List<String> listOfNames;
-        
-        
     public String[] ReadArray() {
         String str = ""; //Read each file from input
         Scanner fin;
         try {
-            File actdir = new File("S://Activities");
+            File actdir = new File("C://Activities/");
             if (!actdir.exists()){
                 actdir.mkdir();
                 String[] tempacts = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
                                     "Sit-ups", "Warm-up", "Weights" };
                 WriteArray(tempacts);
                 }
-            fin = new Scanner(new File("S://activities/activities.txt"));
+            fin = new Scanner(new File("C://activities/activities.txt"));
             int n = fin.nextInt(); //Reads 1st character which represents the
         //number of string files to read
         fin.nextLine();
@@ -1142,11 +1168,11 @@ class ReadWrite {
     public void WriteArray(String[] array){
         try{
             PrintWriter writer = null;
-            File actdir = new File("S://activities");
+            File actdir = new File("C://activities");
             if (!actdir.exists()){
                 actdir.mkdir();
             }
-            writer = new PrintWriter("S://activities/activities.txt", "UTF-8");
+            writer = new PrintWriter("C://activities/activities.txt", "UTF-8");
             writer.println(array.length);
             for (int i = 0; i < array.length; i++){
                 writer.println(array[i]);
@@ -1160,10 +1186,10 @@ class ReadWrite {
     public void createNewFiles(String name){
         try {
             
-            File actMnthdir = new File("S://"+name+"/XP/2000/1");
+            File actMnthdir = new File("C://"+name+"/XP/2000/1");
             if (!actMnthdir.exists()){
                 actMnthdir.mkdirs();
-            PrintWriter textwriter = new PrintWriter("S://"+name+"/XP/2000/1/01.txt");
+            PrintWriter textwriter = new PrintWriter("C://"+name+"/XP/2000/1/01.txt");
             textwriter.print("\tSample Plan\n" +"	12:00 PM	Warm-up\n" +
                 "	12:10 PM	Running\n"+"	12:50 PM	Cooldown");
             textwriter.close();
@@ -1202,11 +1228,11 @@ class ReadWrite {
         }
     
     public String[] getNames(){
-        listOfNames = new ArrayList<String>();
-        File[] files = new File("S://").listFiles();
+        List<String> listOfNames = new ArrayList<String>();
+        File[] files = new File("C://").listFiles();
         for (File namenum : files) {
             if (namenum.isDirectory()) {
-            File nameverify = new File (namenum+"/XP");
+            File nameverify = new File (namenum+"/"+namenum.getName()+"ExercisePref.txt");
             if (nameverify.exists())
                 listOfNames.add(namenum.getName());
             
@@ -1222,7 +1248,7 @@ class ReadWrite {
     public String[] getYear(String name){
         try{
         listOfNames = new ArrayList<String>();
-        File[] files = new File("S://"+name+"/XP/").listFiles();
+        File[] files = new File("C://"+name+"/XP/").listFiles();
         for (File namenum : files) {
             if (namenum.isDirectory()) {
             listOfNames.add(namenum.getName());
@@ -1240,9 +1266,9 @@ class ReadWrite {
         return arraySort(names);
     }
     public String[] getMonths(String name, String year){
-        listOfNames = new ArrayList<String>();
+        List<String> listOfNames = new ArrayList<String>();
         try {
-        File[] files = new File("S://"+name+"/XP/"+year).listFiles();
+        File[] files = new File("C://"+name+"/XP/"+year).listFiles();
         for (File namenum : files) {
             if (namenum.isDirectory()) {
             listOfNames.add(namenum.getName());
@@ -1266,9 +1292,9 @@ class ReadWrite {
     }
     
     public String[] getDays(String name, String year, String month){
-        listOfNames = new ArrayList<String>();
+        List<String> listOfNames = new ArrayList<String>();
         try{
-        File[] files = new File("S://"+name+"/XP/"+year+"/"+month).listFiles();
+        File[] files = new File("C://"+name+"/XP/"+year+"/"+month).listFiles();
         for (File namenum : files) {
             if (namenum.isFile()) {
                 listOfNames.add(namenum.getName().substring(0, 2));
@@ -1290,7 +1316,7 @@ class ReadWrite {
         String Xplan = "";
         month = Integer.toString(monthDetermine(month));
         try {
-        FileReader Xplanfile = new FileReader ("S://"+name+"/XP/"+year+"/"+month+"/"+day+".txt");
+        FileReader Xplanfile = new FileReader ("C://"+name+"/XP/"+year+"/"+month+"/"+day+".txt");
         Xplan = new Scanner(Xplanfile).useDelimiter("\\Z").next();
         }
         catch (IOException ex) {
@@ -1373,3 +1399,5 @@ class ReadWrite {
     }
 
 }
+
+   
