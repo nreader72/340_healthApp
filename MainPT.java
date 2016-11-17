@@ -231,8 +231,7 @@ class MakePlan extends JFrame{
         lopPane.setLayout(new FlowLayout());
         JScrollPane lopScroll = new JScrollPane(lopPane);
         background.add(lopScroll);
-        //JTextField leftside = new JTextField(10);
-        JLabel leftside = new JLabel("10/25/16 Tue");
+        JLabel leftside = new JLabel("Nov 29, 2016 Tues");
         JTextArea rightside = new JTextArea(5,30);
         lopPane.add(leftside);
         lopPane.add(rightside);
@@ -270,6 +269,17 @@ class MakePlan extends JFrame{
                 }
         weightPane.add(weightgoaldisplay);
         weightPane.add(weightgoalText);
+        
+       
+        JLabel weightgoal = new JLabel("");
+        weightgoal.setAlignmentX(Component.CENTER_ALIGNMENT);
+        background.add(weightgoal);
+        System.out.println(weightText.getSelectedText());
+        if (weightText.getText().equals(weightgoalText.getText()))
+            weightgoal.setText("Weight goal reached");
+        else
+            weightgoal.setText("Weight goal not reached");
+        background.add(Box.createVerticalGlue()); 
         
         JPanel dowdisplay = new JPanel();
         FlowLayout dowLayout = new FlowLayout();
@@ -468,15 +478,21 @@ class MakePlan extends JFrame{
                         if (!year.exists())
                             year.mkdirs();
                         File month = new File("C://"+name+"/XP/"+yearstring+"/"+
-                                rw.monthDetermine(monthstring));
+                                rw.monthNum(monthstring)+"/Ratings");
                         if (!month.exists())
-                            month.mkdir();
+                            month.mkdirs();
                         String filename = "C://"+name+"/XP/"+yearstring+"/"+
-                                rw.monthDetermine(monthstring)+"/"
+                                rw.monthNum(monthstring)+"/"
                                 +datespinner.getValue().toString().substring(8,10)+".txt";
-                        System.out.println(filename);
+                        //System.out.println(filename);
                         textwriter= new PrintWriter(filename, "UTF-8");
                         rightside.write(textwriter);
+                        textwriter.close();
+                        filename = "C://"+name+"/XP/"+yearstring+"/"+
+                                rw.monthNum(monthstring)+"/Ratings/"
+                                +datespinner.getValue().toString().substring(8,10)+".txt";
+                        textwriter= new PrintWriter(filename, "UTF-8");
+                        textwriter.write("-");
                         textwriter.close();
                         new PT();
                     } catch (FileNotFoundException ex) {
@@ -583,6 +599,7 @@ class MakePlan extends JFrame{
         rightside.setEditable(false);
         rightside.setText("\tSample Plan\n\t12:00 PM\tWarm-up\n\t12:10 PM\tRunning\n\t12:50 PM\tCooldown");
         
+        
         int x = 4;
         JLabel ratingValue = new JLabel("Rating is "+Integer.toString(x));
         ratingValue.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -619,7 +636,7 @@ class MakePlan extends JFrame{
         dayLayout.setHgap(10);
         daydisplay.add(daytitle);
         
-        monthFile = Integer.toString(rw.monthDetermine((monthlist.getSelectedItem().toString())));
+        monthFile = rw.monthNum(monthlist.getSelectedItem().toString());
         dayarray = rw.getDays(name, yearlist.getSelectedItem().toString(), 
                monthFile);//Gets list of days in months file
         
@@ -639,15 +656,15 @@ class MakePlan extends JFrame{
         background.add(MVP);
         JTextArea status = new JTextArea(1,20);
         status.setAlignmentX(Component.CENTER_ALIGNMENT);
-        background.add(status);
-        
+        //background.add(status);
+        background.add(Box.createVerticalGlue());
         
         yearlist.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
                 
                 monthlist.setModel(new DefaultComboBoxModel(rw.getMonths(name, 
                         yearlist.getSelectedItem().toString())));
-                monthFile = Integer.toString(rw.monthDetermine((monthlist.getSelectedItem().toString())));
+                monthFile = rw.monthNum(monthlist.getSelectedItem().toString());
                 
                 daylist.setModel(new DefaultComboBoxModel(rw.getDays(name, 
                         yearlist.getSelectedItem().toString(),monthFile)));
@@ -655,7 +672,7 @@ class MakePlan extends JFrame{
         });
         monthlist.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
-                monthFile = Integer.toString(rw.monthDetermine((monthlist.getSelectedItem().toString())));
+                monthFile = rw.monthNum(monthlist.getSelectedItem().toString());
                 status.setText(monthFile);
                 daylist.setModel(new DefaultComboBoxModel(rw.getDays(name, 
                         yearlist.getSelectedItem().toString(),monthFile)));
@@ -668,11 +685,13 @@ class MakePlan extends JFrame{
                         +daylist.getSelectedItem().toString()+", "+
                         yearlist.getSelectedItem().toString());
                 
-                ratingValue.setText("Rating is "+Integer.toString(5));
                 try{
                 String text = rw.getXPlan(name, yearlist.getSelectedItem().toString(),
                         monthlist.getSelectedItem().toString(), daylist.getSelectedItem().toString());
                 rightside.setText(text);
+                text = rw.getXRatings(name, yearlist.getSelectedItem().toString(),
+                        monthlist.getSelectedItem().toString(), daylist.getSelectedItem().toString());
+                ratingValue.setText("Rating is "+text);
                 }
                 catch (IOException ex) {
                     System.out.println("File does not Exist");
@@ -1130,7 +1149,7 @@ class MakePlan extends JFrame{
             setVisible(true);
         }
     }
-class ReadWrite {
+    class ReadWrite {
         static String[] act;
         static String[] names;
         static List<String> listOfNames;
@@ -1138,7 +1157,7 @@ class ReadWrite {
         String str = ""; //Read each file from input
         Scanner fin;
         try {
-            File actdir = new File("C://Activities/");
+            File actdir = new File("C://Activities");
             if (!actdir.exists()){
                 actdir.mkdir();
                 String[] tempacts = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
@@ -1186,12 +1205,15 @@ class ReadWrite {
     public void createNewFiles(String name){
         try {
             
-            File actMnthdir = new File("C://"+name+"/XP/2000/1");
+            File actMnthdir = new File("C://"+name+"/XP/2000/1/Ratings");
             if (!actMnthdir.exists()){
                 actMnthdir.mkdirs();
             PrintWriter textwriter = new PrintWriter("C://"+name+"/XP/2000/1/01.txt");
             textwriter.print("\tSample Plan\n" +"	12:00 PM	Warm-up\n" +
                 "	12:10 PM	Running\n"+"	12:50 PM	Cooldown");
+            textwriter.close();
+            textwriter = new PrintWriter("C://"+name+"/XP/2000/1/Ratings/01.txt");
+            textwriter.print("5");
             textwriter.close();
             }
         }
@@ -1286,7 +1308,7 @@ class ReadWrite {
         names = arraySort(names);
         for (int i = 0; i < names.length; i++){
            
-           names[i]= monthnumDetermine(Integer.parseInt(names[i]));
+           names[i]= monthName((names[i]));
         }
         return names;
     }
@@ -1314,7 +1336,7 @@ class ReadWrite {
     
     public String getXPlan(String name, String year, String month, String day) throws FileNotFoundException{
         String Xplan = "";
-        month = Integer.toString(monthDetermine(month));
+        month = monthNum(month);
         try {
         FileReader Xplanfile = new FileReader ("C://"+name+"/XP/"+year+"/"+month+"/"+day+".txt");
         Xplan = new Scanner(Xplanfile).useDelimiter("\\Z").next();
@@ -1398,6 +1420,77 @@ class ReadWrite {
         return ip;
     }
 
+    public String monthNum(String month){
+        if (month.equalsIgnoreCase("Jan"))
+                return "1";
+        else if (month.equalsIgnoreCase("Feb"))
+                return "2";
+        else if (month.equalsIgnoreCase("Mar"))
+                return "3";
+        else if (month.equalsIgnoreCase("Apr"))
+                return "4";
+        else if (month.equalsIgnoreCase("May"))
+                return "5";
+        else if (month.equalsIgnoreCase("Jun"))
+                return "6";
+        else if (month.equalsIgnoreCase("Jul"))
+                return "7";
+        else if (month.equalsIgnoreCase("Aug"))
+                return "8";
+        else if (month.equalsIgnoreCase("Sep"))
+                return "9";
+        else if (month.equalsIgnoreCase("Oct"))
+                return "10";
+        else if (month.equalsIgnoreCase("Nov"))
+                return "11";
+        else if (month.equalsIgnoreCase("Dec"))
+                return "12";
+        return "1";
+    }
+    
+    public String monthName(String month){
+        if (month.equalsIgnoreCase("1"))
+                return "Jan";
+        else if (month.equalsIgnoreCase("2"))
+                return "Feb";
+        else if (month.equalsIgnoreCase("3"))
+                return "Mar";
+        else if (month.equalsIgnoreCase("4"))
+                return "Apr";
+        else if (month.equalsIgnoreCase("5"))
+                return "May";
+        else if (month.equalsIgnoreCase("6"))
+                return "Jun";
+        else if (month.equalsIgnoreCase("7"))
+                return "Jul";
+        else if (month.equalsIgnoreCase("8"))
+                return "Aug";
+        else if (month.equalsIgnoreCase("9"))
+                return "Sep";
+        else if (month.equalsIgnoreCase("10"))
+                return "Oct";
+        else if (month.equalsIgnoreCase("11"))
+                return "Nov";
+        else if (month.equalsIgnoreCase("12"))
+                return "Dec";
+        return "Jan";
+    }
+    
+    public String getXRatings (String name, String year, String month, String day) throws FileNotFoundException {
+        String Xplan = "";
+        month = monthNum(month);
+        try {
+        FileReader Xplanfile = new FileReader ("C://"+name+"/XP/"+year+"/"+month+"/Ratings/"+day+".txt");
+        Xplan = new Scanner(Xplanfile).useDelimiter("\\Z").next();
+        }
+        catch (IOException ex) {
+        System.out.println("File does not Exist");
+        }
+        return Xplan;
+        
+    }
+
 }
+
 
    
