@@ -7,10 +7,13 @@ add their prefernces of food and exercise. They will also be able to put in thei
 desired weight, whether it be to gain weight or to lose it. All information will
 be stored in a text file to be used by other team members.
  */
+
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -39,7 +42,7 @@ public class FamilyMemberGUI {
     /**
      * Display the GUI.
      */
-    public static void fullscreenGUI() {
+    public static void fullscreenGUI() throws IOException {
 
         //Create and set up the window.
         frame = new JFrame("Family Member Subsystem");
@@ -54,7 +57,7 @@ public class FamilyMemberGUI {
     /**
      * Asks user for their name and checks to see if the name is already in use.
      */
-    public static void loginMenu() {
+    public static void loginMenu() throws IOException {
 
         frame.add(loginPanel);
         loginPanel.setLayout(new GridBagLayout());
@@ -73,10 +76,18 @@ public class FamilyMemberGUI {
                     loginPanel.removeAll();
                     loginPanel.revalidate();
                     loginPanel.repaint();
-                    mainGUI(loginUser);
+                    try {
+                        mainGUI(loginUser);
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(FamilyMemberGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(frame, "Error! Name not registered!");
-                    loginMenu();
+                    try {
+                        loginMenu();
+                    } catch (IOException ex) {
+                        Logger.getLogger(FamilyMemberGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         });
@@ -130,8 +141,11 @@ public class FamilyMemberGUI {
      * and exercise plans.
      * @param userName
      */
-    public static void mainGUI(String userName) {
-
+    public static void mainGUI(String userName) throws FileNotFoundException {
+        
+        File mpFile = new File("C://" + loginUser, loginUser + "MP.txt");
+        File ptFile = new File("C://" + loginUser, loginUser + "PT.txt");
+        
         frame.add(mainPanel);
         mainPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -200,7 +214,11 @@ public class FamilyMemberGUI {
                 mainPanel.removeAll();
                 mainPanel.revalidate();
                 mainPanel.repaint();
-                loginMenu();
+                try {
+                    loginMenu();
+                } catch (IOException ex) {
+                    Logger.getLogger(FamilyMemberGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         
@@ -219,6 +237,24 @@ public class FamilyMemberGUI {
         mainPanel.add(backButton, gbc);
         backButton.requestFocus();
         
+        if(mpFile.exists()){
+            int n = JOptionPane.showConfirmDialog(frame, "Would you like to go to MP subsytem?",
+                    "", JOptionPane.YES_NO_OPTION);
+            if(n == 0){
+                mealPlannerGUI mp = new mealPlannerGUI();
+                JPanel panel = new JPanel();
+                mp.MealPlanner(panel);
+                mp.makeJFrame(panel, "Meal Planner", 500, 500);
+            }
+        }
+        if(ptFile.exists()){
+            int n = JOptionPane.showConfirmDialog(frame, "Would you like to go to PT subsytem?",
+                    "", JOptionPane.YES_NO_OPTION);
+            if(n == 0){
+                PT pt = new PT();
+            }
+        }
+        
         mainPanel.setVisible(true);
     }
    
@@ -230,7 +266,11 @@ public class FamilyMemberGUI {
 
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                fullscreenGUI();
+                try {
+                    fullscreenGUI();
+                } catch (IOException ex) {
+                    Logger.getLogger(FamilyMemberGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
@@ -277,17 +317,6 @@ class WeightGUI extends FamilyMemberGUI {
             }
         });
         
-//        JButton editGoal = new JButton("Edit weight goal");
-//        editGoal.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent ae) {
-//                weightPanel.removeAll();
-//                weightPanel.revalidate();
-//                weightPanel.repaint();
-//                editWeightGUI(userName);
-//            }
-//        });
-        
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -296,7 +325,11 @@ class WeightGUI extends FamilyMemberGUI {
                 weightPanel.removeAll();
                 weightPanel.revalidate();
                 weightPanel.repaint();
-                FamilyMemberGUI.mainGUI(loginUser);
+                try {
+                    FamilyMemberGUI.mainGUI(loginUser);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(WeightGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         
@@ -420,9 +453,38 @@ class FoodGUI extends FamilyMemberGUI {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
 
-        Ratings.setMealRatings(loginUser);
-        ViewRatings.mealRatings(loginUser);
+        JButton viewPlan = new JButton("View meal plan");
+        viewPlan.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
 
+                foodPanel.removeAll();
+                foodPanel.revalidate();
+                foodPanel.repaint();
+                try {
+                    Ratings.getMealRatings(loginUser);
+                } catch (IOException ex) {
+                    Logger.getLogger(ExerciseGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
+        JButton ratePlan = new JButton("Rate plan");
+        ratePlan.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                foodPanel.removeAll();
+                foodPanel.revalidate();
+                foodPanel.repaint();
+                try {
+                    Ratings.setMealRatings(loginUser);
+                } catch (IOException ex) {
+                    Logger.getLogger(ExerciseGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -431,9 +493,18 @@ class FoodGUI extends FamilyMemberGUI {
                 foodPanel.removeAll();
                 foodPanel.revalidate();
                 foodPanel.repaint();
-                mainGUI(loginUser);
+                try {
+                    mainGUI(loginUser);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(ExerciseGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
+        
+        foodPanel.add(viewPlan);
+        viewPlan.requestFocus();
+        foodPanel.add(ratePlan);
+        ratePlan.requestFocus();
         foodPanel.add(backButton);
         backButton.requestFocus();
         foodPanel.setVisible(true);
@@ -471,7 +542,6 @@ class ExerciseGUI extends FamilyMemberGUI {
             }
         });
         
-        
         JButton ratePlan = new JButton("Rate plan");
         ratePlan.addActionListener(new ActionListener() {
             @Override
@@ -496,7 +566,11 @@ class ExerciseGUI extends FamilyMemberGUI {
                 exercisePanel.removeAll();
                 exercisePanel.revalidate();
                 exercisePanel.repaint();
-                mainGUI(loginUser);
+                try {
+                    mainGUI(loginUser);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(ExerciseGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         
@@ -669,6 +743,31 @@ class RegisterGUI extends FamilyMemberGUI {
             Logger.getLogger(RegisterGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+        String txt = "Type MP for Meal Planner\n"
+                + "Type PT for Physical Tranier\n"
+                + "Erase for neither one";
+        JTextArea txtArea = new JTextArea(txt);
+        txtArea.setLineWrap(true);
+        txtArea.setWrapStyleWord(true);
+        txtArea.setRows(5);
+        txtArea.setColumns(10);
+        weightPanel.add(txtArea, gbc);
+        
+        JOptionPane.showMessageDialog(null, new JScrollPane(txtArea));
+        
+        String text = txtArea.getText().trim();
+        
+        if(!text.equals("")){
+            if(text.equals("MP")){
+                File mpFile = new File("C://" + loginUser, loginUser + "MP.txt");
+                mpFile.createNewFile();
+            }
+            if(text.equals("PT")){
+                File ptFile = new File("C://" + loginUser, loginUser + "PT.txt");
+                ptFile.createNewFile();
+            }
+        }
+        
         JOptionPane.showMessageDialog(frame, "You are now registered. Returning"
                 + " to the login screen.");
         
@@ -751,13 +850,39 @@ class Ratings extends FamilyMemberGUI{
             JOptionPane.showMessageDialog(frame, "Error! File does not exist!");
         }
         
-        JTextField txtField = new JTextField();
-        txtField.setEditable(false);
-        FileReader reader = new FileReader(userFile);
-        txtField.read(reader, userFile);
-        JScrollPane sPane = new JScrollPane(txtField);
-        sPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        foodPanel.add(sPane, gbc);
+        String filePath = userFile.getPath();
+        JTextArea txtArea = new JTextArea();
+        
+        mealPlannerGUI mp2 = new mealPlannerGUI();
+        mealPlannerGUI.MealPlan mp3 = mp2.new MealPlan();
+        Map<String, ArrayList> newMap = mp3.mapFromFile(filePath);
+        for(Map.Entry<String, ArrayList> entry : newMap.entrySet()){
+            txtArea.append(entry.getKey());
+            txtArea.append(entry.getValue().toString());
+            txtArea.append("\n");
+        }
+        
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                foodPanel.removeAll();
+                foodPanel.revalidate();
+                foodPanel.repaint();
+                try {
+                    mainGUI(loginUser);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Ratings.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
+        foodPanel.add(txtArea);
+        foodPanel.add(backButton);
+        backButton.requestFocus();
+//        JOptionPane.showMessageDialog(foodPanel, txtArea);
+        
     }
     
     public static void getExerciseRatings(String userName) throws FileNotFoundException, IOException{
@@ -780,7 +905,11 @@ class Ratings extends FamilyMemberGUI{
                 exercisePanel.removeAll();
                 exercisePanel.revalidate();
                 exercisePanel.repaint();
-                mainGUI(loginUser);
+                try {
+                    mainGUI(loginUser);
+                } catch (FileNotFoundException ex) {
+                    Logger.getLogger(Ratings.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         exercisePanel.add(backButton);
@@ -802,7 +931,7 @@ class Ratings extends FamilyMemberGUI{
     
     public static void setExerciseRatings(String userName) throws IOException{
         
-        ViewPlans obj = new ViewPlans(loginUser);
+        ViewPlans2 obj = new ViewPlans2(loginUser);
         FamilyMemberGUI.mainGUI(userName);
     }
 }
