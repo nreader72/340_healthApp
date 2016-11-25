@@ -10,6 +10,7 @@ be stored in a text file to be used by other team members.
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -33,10 +34,6 @@ public class FamilyMemberGUI {
     static JPanel exercisePrefPanel = new JPanel(new GridBagLayout());
     static JPanel foodPrefPanel = new JPanel(new GridBagLayout());
     static JPanel weightPrefPanel = new JPanel(new GridBagLayout());
-//    static JPanel setMealRatingsPanel = new JPanel();
-//    static JPanel setExerciseRatingsPanel = new JPanel();
-//    static JPanel getMealRatingsPanel = new JPanel();
-//    static JPanel getExerciseRatingsPanel = new JPanel();
     static String loginUser;
 
     /**
@@ -265,18 +262,32 @@ class WeightGUI extends FamilyMemberGUI {
         
         JTextField currWeight = new JTextField("Current weight: ");
         
-        JButton weightEditButton = new JButton("Enter weekly weight");
+        JButton weightEditButton = new JButton("Weight management");
         weightEditButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 weightPanel.removeAll();
                 weightPanel.revalidate();
                 weightPanel.repaint();
-                editWeightGUI(userName);
+                try {
+                    editWeightGUI(userName);
+                } catch (IOException ex) {
+                    Logger.getLogger(WeightGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         
-
+//        JButton editGoal = new JButton("Edit weight goal");
+//        editGoal.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent ae) {
+//                weightPanel.removeAll();
+//                weightPanel.revalidate();
+//                weightPanel.repaint();
+//                editWeightGUI(userName);
+//            }
+//        });
+        
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -301,6 +312,8 @@ class WeightGUI extends FamilyMemberGUI {
         Weight.getCurrentWeight(userName);
         weightPanel.add(weightEditButton, gbc);
         weightEditButton.requestFocus();
+//        weightPanel.add(editGoal, gbc);
+//        editGoal.requestFocus();
         weightPanel.add(backButton, gbc);
         backButton.requestFocus();
         
@@ -311,19 +324,27 @@ class WeightGUI extends FamilyMemberGUI {
      * Lets the user change their weight goal to a different yet reasonable goal.
      * @param userName
      */
-    public static void editWeightGUI(String userName) {
+    public static void editWeightGUI(String userName) throws FileNotFoundException, IOException {
         
         File userFile = new File("C://" + userName, userName + "WeightPref.txt");
+        File goalFile = new File("C://" + userName, userName + "WeightGoal.txt");
         frame.add(newWeightPanel);
         newWeightPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
+        FileReader reader = new FileReader(userFile);
+        FileReader reader2 = new FileReader(goalFile);
 
-//        JLabel newWeightLabel = new JLabel("Enter weekly weight");
-//        newWeightPanel.add(newWeightLabel);
-//        newWeightLabel.requestFocusInWindow();
-
-        JTextField userText = new JTextField("Enter weekly weight",20);
+        JTextField userText = new JTextField(25);
+        userText.read(reader, userFile);
+        JTextField newGoal = new JTextField(20);
+        newGoal.read(reader2, goalFile);
+        JTextField txt1 = new JTextField("Weekly weight");
+        txt1.setEditable(false);
+        JTextField txt2 = new JTextField("New weight goal");
+        txt2.setEditable(false);
         
+        String tempTxt1 = userText.getText();
+        String tempTxt2 = newGoal.getText();
 
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(new ActionListener() {
@@ -336,6 +357,11 @@ class WeightGUI extends FamilyMemberGUI {
                 try {
                     try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(userFile))) {
                         userText.write(fileOut);
+                    } catch (IOException ex) {
+                        Logger.getLogger(RegisterGUI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    try (BufferedWriter fileOut2 = new BufferedWriter(new FileWriter(goalFile))) {
+                        newGoal.write(fileOut2);
                     } catch (IOException ex) {
                         Logger.getLogger(RegisterGUI.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -364,11 +390,16 @@ class WeightGUI extends FamilyMemberGUI {
         
         newWeightPanel.add(userText);
         userText.requestFocus();
+        newWeightPanel.add(newGoal, gbc);
         newWeightPanel.add(saveButton);
         saveButton.requestFocus();
         newWeightPanel.add(backButton);
         backButton.requestFocus();
-        
+        gbc.gridy = 1;
+        newWeightPanel.add(txt1, gbc);
+        txt1.requestFocus();
+        newWeightPanel.add(txt2, gbc);
+        txt2.requestFocus();
         newWeightPanel.setVisible(true);
     }
 }
@@ -424,21 +455,57 @@ class ExerciseGUI extends FamilyMemberGUI {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         
-        Ratings.setExerciseRatings(loginUser);
-//        Ratings.getExerciseRatings(loginUser);
+        JButton viewPlan = new JButton("View exercise plan");
+        viewPlan.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
 
-//        JButton backButton = new JButton("Back");
-//        backButton.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent ae) {
-//                exercisePanel.removeAll();
-//                exercisePanel.revalidate();
-//                exercisePanel.repaint();
-//                mainGUI(loginUser);
-//            }
-//        });
-//        exercisePanel.add(backButton, gbc);
-//        backButton.requestFocusInWindow();
+                exercisePanel.removeAll();
+                exercisePanel.revalidate();
+                exercisePanel.repaint();
+                try {
+                    Ratings.getExerciseRatings(loginUser);
+                } catch (IOException ex) {
+                    Logger.getLogger(ExerciseGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
+        
+        JButton ratePlan = new JButton("Rate plan");
+        ratePlan.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                exercisePanel.removeAll();
+                exercisePanel.revalidate();
+                exercisePanel.repaint();
+                try {
+                    Ratings.setExerciseRatings(loginUser);
+                } catch (IOException ex) {
+                    Logger.getLogger(ExerciseGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                exercisePanel.removeAll();
+                exercisePanel.revalidate();
+                exercisePanel.repaint();
+                mainGUI(loginUser);
+            }
+        });
+        
+        exercisePanel.add(viewPlan);
+        viewPlan.requestFocus();
+        exercisePanel.add(ratePlan);
+        ratePlan.requestFocus();
+        exercisePanel.add(backButton);
+        backButton.requestFocus();
         exercisePanel.setVisible(true);
     }
 }
@@ -501,29 +568,6 @@ class RegisterGUI extends FamilyMemberGUI {
         exercisePrefPanel.revalidate();
         exercisePrefPanel.repaint();
         RegisterGUI.foodPref(userName);
-
-//        JButton toFoodPref = new JButton("Next");
-//        toFoodPref.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent ae) {
-//                exercisePrefPanel.removeAll();
-//                exercisePrefPanel.revalidate();
-//                exercisePrefPanel.repaint();
-//                try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(userFile))) {
-//                    textArea.write(fileOut);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(RegisterGUI.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                try {
-//                    foodPref(userName);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(RegisterGUI.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
-//        });
-//        exercisePrefPanel.add(toFoodPref, gbc);
-//        exercisePrefPanel.setVisible(true);
-        
     }
    
     /**
@@ -573,29 +617,6 @@ class RegisterGUI extends FamilyMemberGUI {
         foodPrefPanel.revalidate();
         foodPrefPanel.repaint();
         RegisterGUI.weightPref(userName);
-       
-//        JButton toWeightPref = new JButton("Next");
-//        toWeightPref.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent ae) {
-//                foodPrefPanel.removeAll();
-//                foodPrefPanel.revalidate();
-//                foodPrefPanel.repaint();
-//                try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(userFile))) {
-//                    textArea.write(fileOut);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(RegisterGUI.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                try {
-//                    weightPref(userName);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(RegisterGUI.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//            }
-//        });
-//        foodPrefPanel.add(toWeightPref, gbc);
-//        foodPrefPanel.setVisible(true);
-        
     }
    
     /**
@@ -649,32 +670,12 @@ class RegisterGUI extends FamilyMemberGUI {
         }
         
         JOptionPane.showMessageDialog(frame, "You are now registered. Returning"
-                + "to the login screen.");
+                + " to the login screen.");
         
         weightPrefPanel.removeAll();
         weightPrefPanel.revalidate();
         weightPrefPanel.repaint();
         FamilyMemberGUI.loginMenu();
-       
-//        JButton save = new JButton("Save");
-//        save.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent ae) {
-//                weightPrefPanel.removeAll();
-//                weightPrefPanel.revalidate();
-//                weightPrefPanel.repaint();
-//                try (BufferedWriter fileOut = new BufferedWriter(new FileWriter(userFile))) {
-//                    textArea.write(fileOut);
-//                } catch (IOException ex) {
-//                    Logger.getLogger(RegisterGUI.class.getName()).log(Level.SEVERE, null, ex);
-//                }
-//                FamilyMemberGUI.mainGUI(userName);
-//            }
-//        });
-//        weightPrefPanel.add(save, gbc);
-//        weightPrefPanel.setVisible(true);
-        
-        
     }
    
     /**
@@ -740,27 +741,15 @@ class Ratings extends FamilyMemberGUI{
     
     public static void getMealRatings(String userName) throws IOException {
         
-//        frame.add(getMealRatingsPanel);
-//        getMealRatingsPanel.setLayout(new GridBagLayout());
         frame.add(foodPanel);
         foodPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         
-//        JLabel info = new JLabel("Meal Ratings");
-//        foodPanel.add(info, gbc);
-        
         File userFile = new File("C://" + userName, userName + "FoodRatings.txt");
         if(!userFile.exists()){
             JOptionPane.showMessageDialog(frame, "Error! File does not exist!");
         }
-        
-//        JTextArea textArea = new JTextArea();
-//        FileReader reader = new FileReader(userFile);
-//        textArea.read(reader, userFile);
-        
-//        foodPanel.add(textArea, gbc);
-//        textArea.requestFocusInWindow();
         
         JTextField txtField = new JTextField();
         txtField.setEditable(false);
@@ -769,45 +758,33 @@ class Ratings extends FamilyMemberGUI{
         JScrollPane sPane = new JScrollPane(txtField);
         sPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         foodPanel.add(sPane, gbc);
-        
-        
-//        File inFile = FindUser.getUser(userName);
-//        
-//        JTextArea textArea = new JTextArea();
-//        
-//        textArea.setText(inFile.toString());
-//        getMealRatingsPanel.add(textArea, gbc);
-//        textArea.requestFocusInWindow();
-//        getMealRatingsPanel.setVisible(true);
     }
     
     public static void getExerciseRatings(String userName) throws FileNotFoundException, IOException{
-//        frame.add(getExerciseRatingsPanel);
-//        getExerciseRatingsPanel.setLayout(new GridBagLayout());
+        
         frame.add(exercisePanel);
         exercisePanel.setLayout(new GridBagLayout());
         File userFile = new File("C://" + userName, userName + "ExerciseRatings.txt");
         GridBagConstraints gbc = new GridBagConstraints();
-//        gbc.gridx = 0;
         
+        ReadWrite rw = new ReadWrite();
+        String text = rw.getXPlan(userName, "2000", "1", "01");
+        JTextField txt = new JTextField(text);
+        exercisePanel.add(txt);
         
-        
-//        ViewPlans1 obj = new ViewPlans1(loginUser);
-        
-//        JLabel info = new JLabel("Exercise Ratings");
-//        exercisePanel.add(info, gbc);
-//        info.requestFocusInWindow();
-        
-//        if(!userFile.exists()){
-//            JOptionPane.showMessageDialog(frame, "Error! File does not exist!");
-//        }
-//        
-//        JTextArea textArea = new JTextArea();
-//        FileReader reader = new FileReader(userFile);
-//        textArea.read(reader, userFile);
-//        
-//        exercisePanel.add(textArea, gbc);
-//        textArea.requestFocusInWindow();
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+
+                exercisePanel.removeAll();
+                exercisePanel.revalidate();
+                exercisePanel.repaint();
+                mainGUI(loginUser);
+            }
+        });
+        exercisePanel.add(backButton);
+        backButton.requestFocus();
     }
     
     public static void setMealRatings(String userName) throws IOException{
@@ -825,19 +802,8 @@ class Ratings extends FamilyMemberGUI{
     
     public static void setExerciseRatings(String userName) throws IOException{
         
-//        frame.add(setExerciseRatingsPanel);
-//        setExerciseRatingsPanel.setLayout(new GridBagLayout());
-        
         ViewPlans obj = new ViewPlans(loginUser);
-        ReadWrite rObj = new ReadWrite();
-        File userFile = new File("C://" + loginUser + "XP" + rObj.getYear(loginUser) + rObj.getMonths(loginUser, rObj.getYear(loginUser).toString()));
-        FamilyMemberGUI.mainGUI(FamilyMemberGUI.loginUser);
-//        File userFile = new File("C://" + userName, userName + "ExerciseRatings.txt");
-//        if(!userFile.exists()){
-//            userFile.createNewFile();
-//        }
-        
-//        setExerciseRatingsPanel.setVisible(true);
+        FamilyMemberGUI.mainGUI(userName);
     }
 }
 
@@ -974,10 +940,6 @@ class ViewWeight extends FamilyMemberGUI {
         weightGoal.setEditable(false);
         weightPanel.add(weightGoal);
         weightGoal.requestFocus();
-        
-//        JLabel weightGoal = new JLabel(goal);
-//        weightPanel.add(weightGoal, gbc);
-//        weightGoal.requestFocus();
     }
     
     /**
