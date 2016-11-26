@@ -869,29 +869,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
 
     
  
-/*work in progress
 
-public static void makeScrollFrame (JPanel panel, String frameName, int xFrame, int yFrame){
-
-    JScrollPane myJScrollPane = new JScrollPane(panel,
-         JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-         JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-    
-    JFrame newFrame = new JFrame(frameName);
-    //JScrollPane pane = new JScrollPane(panel);
-    newFrame.setSize(xFrame, yFrame);
-    ImageIcon img = new ImageIcon("src/resourceFolder/Pimage.png");
-                      
-    newFrame.setIconImage(img.getImage());
-    newFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    //newFrame.add(myJScrollPane);
-    newFrame.add(panel);
-    //newFrame.add(pane);
-    //panel.add(myJScrollPane);
-    newFrame.setVisible(true);
-    
-}
-*/
 ///////////////////////////////////////////////////////LOGIC LAYER
  public class CalorieCount extends mealPlannerGUI{
         
@@ -1171,6 +1149,31 @@ public static void makeScrollFrame (JPanel panel, String frameName, int xFrame, 
                         
                     }
             return newMap;       
+            
+        }
+        
+        public void mapToFile(String file) throws IOException{
+            
+            MealPlan map = new MealPlan();
+    
+            Map<String,ArrayList> newMap = map.mapFromFile("mealPlan.txt");
+            
+            /*
+            Here is where the ratings will be appended to.  If they are just added
+            in a specific sequence I should be good.
+            */
+            
+            
+            Properties properties = new Properties();
+
+            for (Map.Entry<String,ArrayList> entry : newMap.entrySet()) {
+                properties.put(entry.getKey(), entry.getValue().toString());
+            }
+
+
+
+            FileOutputStream fos = new FileOutputStream((file), true);
+            properties.store(fos,null);
             
         }
        
