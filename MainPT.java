@@ -29,15 +29,12 @@ import java.util.List;
  */
 public class MainPT {
     public static void main(String[] args) throws FileNotFoundException {
-        String name = "David";
-        
+        //String name = "Jill";
         //String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
         //   "Sit-ups", "Warm-up", "Weights" };//Demo equipment list
-        
-        
         new PT();
         //new SAP(0);
-        //new ViewPlans(name);
+        //new ViewPlans2(name);
         //new Modify(name);
         //new MakePlan(name, things);
         //new ViewActivities(things);
@@ -62,13 +59,11 @@ public class MainPT {
         
         
         JButton MXP =  new JButton("Make Exercise Plan and View Ratings & Preferences");
-        //JButton VXR =  new JButton("View Exercise Ratings");
         JButton VXP = new JButton("View Old Exercise Plans");
         JButton VXA =  new JButton("View Exercise Activities");
         JButton exit = new JButton("Exit to Family Planner");
         
         MXP.setAlignmentX(Component.CENTER_ALIGNMENT);
-        //VXR.setAlignmentX(Component.CENTER_ALIGNMENT);
         VXP.setAlignmentX(Component.CENTER_ALIGNMENT);
         VXA.setAlignmentX(Component.CENTER_ALIGNMENT);
         exit.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -82,12 +77,6 @@ public class MainPT {
             }});
         
         background.add(Box.createVerticalGlue());
-        //background.add(VXR);
-        /*VXR.addActionListener(new ActionListener(){
-        public void actionPerformed(ActionEvent e){
-        new SAP(2, actlist);
-        dispose();
-        }});*/
         
         background.add(VXP);
         VXP.addActionListener(new ActionListener(){
@@ -186,10 +175,7 @@ class SAP extends JFrame {
         new MakePlan(e.getActionCommand(), things);
         dispose();
      }
-    /*else if (selected == 2){
-    new ViewRatings(e.getActionCommand());
-    dispose();
-    }*/
+    
     else if (selected == 3){
         new ViewPlans(e.getActionCommand());
         dispose();
@@ -247,7 +233,7 @@ class MakePlan extends JFrame{
         weightText.setEditable(false);
         FileReader reader = null;
                 try {
-                    reader = new FileReader("C://"+name+"/"+name+"WeightPref.txt");
+                    reader = new FileReader("H://"+name+"/"+name+"WeightPref.txt");
                     weightText.read(reader, weightPane);
                 } 
                 catch (IOException exception) {
@@ -261,7 +247,7 @@ class MakePlan extends JFrame{
         weightgoalText.setEditable(false);
         reader = null;
                 try {
-                    reader = new FileReader("C://"+name+"/"+name+"WeightGoal.txt");
+                    reader = new FileReader("H://"+name+"/"+name+"WeightGoal.txt");
                     weightgoalText.read(reader, weightPane);
                 } 
                 catch (IOException exception) {
@@ -275,7 +261,7 @@ class MakePlan extends JFrame{
         weightgoal.setAlignmentX(Component.CENTER_ALIGNMENT);
         background.add(weightgoal);
         System.out.println(weightText.getSelectedText());
-        if (weightText.getText().equals(weightgoalText.getText()))
+        if (weightText.getText().compareTo(weightgoalText.getText())<=0)
             weightgoal.setText("Weight goal reached");
         else
             weightgoal.setText("Weight goal not reached");
@@ -380,7 +366,7 @@ class MakePlan extends JFrame{
         prefDescrip.setEditable(false);
         reader = null;
                 try {
-                    reader = new FileReader("C://"+name+"/"+name+"ExercisePref.txt");
+                    reader = new FileReader("H://"+name+"/"+name+"ExercisePref.txt");
                     prefDescrip.read(reader, bottommiddlePane);
                 } 
                 catch (IOException exception) {
@@ -396,7 +382,7 @@ class MakePlan extends JFrame{
         ratDescrip.setEditable(false);
         reader = null;
                 try {
-                    reader = new FileReader("C://"+name+"/"+name+"ExerciseRatings.txt");
+                    reader = new FileReader("H://"+name+"/"+name+"ExerciseRatings.txt");
                     ratDescrip.read(reader, bottomrightPane);
                 } 
                 catch (IOException exception) {
@@ -474,21 +460,21 @@ class MakePlan extends JFrame{
                         PrintWriter textwriter = null;
                         String yearstring = datespinner.getValue().toString().substring(24,28);
                         String monthstring = datespinner.getValue().toString().substring(4,7);
-                        File year = new File("C://"+name+"/XP/"+yearstring);
+                        File year = new File("H://"+name+"/XP/"+yearstring);
                         if (!year.exists())
                             year.mkdirs();
-                        File month = new File("C://"+name+"/XP/"+yearstring+"/"+
+                        File month = new File("H://"+name+"/XP/"+yearstring+"/"+
                                 rw.monthNum(monthstring)+"/Ratings");
                         if (!month.exists())
                             month.mkdirs();
-                        String filename = "C://"+name+"/XP/"+yearstring+"/"+
+                        String filename = "H://"+name+"/XP/"+yearstring+"/"+
                                 rw.monthNum(monthstring)+"/"
                                 +datespinner.getValue().toString().substring(8,10)+".txt";
                         //System.out.println(filename);
                         textwriter= new PrintWriter(filename, "UTF-8");
                         rightside.write(textwriter);
                         textwriter.close();
-                        filename = "C://"+name+"/XP/"+yearstring+"/"+
+                        filename = "H://"+name+"/XP/"+yearstring+"/"+
                                 rw.monthNum(monthstring)+"/Ratings/"
                                 +datespinner.getValue().toString().substring(8,10)+".txt";
                         textwriter= new PrintWriter(filename, "UTF-8");
@@ -527,7 +513,7 @@ class MakePlan extends JFrame{
                 actDescrip.setText("");
                 FileReader reader = null;
                 try {
-                    reader = new FileReader("C://Activities/"+thingslist.getSelectedItem()+".txt");
+                    reader = new FileReader("H://Activities/"+thingslist.getSelectedItem()+".txt");
                     actDescrip.read(reader, background);
                 } 
                 catch (IOException exception) {
@@ -546,6 +532,7 @@ class MakePlan extends JFrame{
     }
     
 }
+
  class ViewPlans extends JFrame{
         public static ReadWrite rw;
         public static String[] montharray;
@@ -717,7 +704,7 @@ class MakePlan extends JFrame{
                 else 
                     dayFile = daylist.getSelectedItem().toString();
                 
-                String filename = "C://"+name+"/XP/"+yearlist.getSelectedItem().toString()+
+                String filename = "H://"+name+"/XP/"+yearlist.getSelectedItem().toString()+
                     "/"+monthFile+"/"+dayFile+".txt";
                     
                 System.out.println(filename);
@@ -748,7 +735,7 @@ class MakePlan extends JFrame{
     }
         
 }
-    class Modify extends JFrame{
+ class Modify extends JFrame{
         public static String name;
         
         public Modify (String name){
@@ -934,7 +921,7 @@ class MakePlan extends JFrame{
     }
     
 }
-    class Create extends JFrame {
+ class Create extends JFrame {
             public static String[] things;
             public static ReadWrite rw;
         public Create(String[] actlist){
@@ -1012,7 +999,7 @@ class MakePlan extends JFrame{
                     newlist = rw.arrayCompare(namefield.getText(), things);
                     try {
                         FileWriter textwriter = null;
-                        textwriter= new FileWriter("C://Activities/"+namefield.getText()+".txt");
+                        textwriter= new FileWriter("H://Activities/"+namefield.getText()+".txt");
                         descriptext.write(textwriter);
                     } catch (IOException ex) {
                         System.out.println("Save button for modify");
@@ -1044,7 +1031,7 @@ class MakePlan extends JFrame{
         }
         
     }
-    class ModifySelect extends JFrame{
+ class ModifySelect extends JFrame{
             public static String[] things;
             
         public ModifySelect(String[] actlist){
@@ -1090,7 +1077,7 @@ class MakePlan extends JFrame{
                     try {
                     actDescrip.setText("");
                     FileReader reader = null;
-                    reader = new FileReader("C://Activities/"+(String)thingslist.getSelectedValue()+".txt");
+                    reader = new FileReader("H://Activities/"+(String)thingslist.getSelectedValue()+".txt");
                     actDescrip.read(reader, actDescriPane);
                     } 
                     catch (IOException exception) {
@@ -1118,7 +1105,7 @@ class MakePlan extends JFrame{
                 public void actionPerformed(ActionEvent e){
                     try {
                         FileWriter textwriter = null;
-                        textwriter= new FileWriter("C://Activities/"+(String)thingslist.getSelectedValue()+".txt");
+                        textwriter= new FileWriter("H://Activities/"+(String)thingslist.getSelectedValue()+".txt");
                         actDescrip.write(textwriter);
                         new PT();
                     } catch (FileNotFoundException ex) {
@@ -1149,6 +1136,196 @@ class MakePlan extends JFrame{
             setVisible(true);
         }
     }
+
+ class ViewPlans2 extends JFrame{
+        public static ReadWrite rw;
+        public static String[] montharray;
+        public static String[] dayarray;
+        public static String monthFile;
+        
+    public ViewPlans2(String name){
+        super("Change Exercise Plan Ratings");
+        setSize(500,400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        
+        rw = new ReadWrite();
+        rw.createNewFiles(name);
+                
+        JPanel background = new JPanel();
+        background.setLayout(new BoxLayout(background, BoxLayout.Y_AXIS));
+        add(background);
+        
+        JPanel toptitle = new JPanel();
+        toptitle.setLayout(new FlowLayout());
+        JLabel op = new JLabel("Old Plans for");
+        op.setAlignmentX(Component.CENTER_ALIGNMENT);
+        toptitle.add(op);
+        JLabel titlename = new JLabel(name);
+        toptitle.add(titlename);
+        background.add(toptitle);
+        
+        FlowLayout dtaLayout = new FlowLayout();
+        JPanel dtaPane = new JPanel();
+        dtaPane.setLayout(dtaLayout);
+        dtaLayout.setHgap(40);
+        JLabel date = new JLabel("Date: ");
+        JLabel time = new JLabel("Time: ");
+        JLabel activity = new JLabel("Activity: ");
+        dtaPane.add(date);
+        dtaPane.add(time);
+        dtaPane.add(activity);
+        background.add(dtaPane);
+        
+        JPanel lopPane = new JPanel();
+        FlowLayout lopLayout = new FlowLayout();
+        lopPane.setLayout(lopLayout);
+        JScrollPane lopScroll = new JScrollPane(lopPane);
+        background.add(lopScroll);
+        
+        JLabel leftside = new JLabel("10/25/16 Tue");
+        JTextArea rightside = new JTextArea(5,30);
+        lopPane.add(leftside);
+        lopPane.add(rightside);
+        rightside.setEditable(false);
+        rightside.setText("\tSample Plan\n\t12:00 PM\tWarm-up\n\t12:10 PM\tRunning\n\t12:50 PM\tCooldown");
+        
+        
+        JPanel ratingLayout = new JPanel();
+        ratingLayout.setLayout(new FlowLayout());
+        JLabel ratingValue = new JLabel("Rating is (1-5):");
+        ratingValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JTextField ratingText = new JTextField(3);
+        ratingText.setText("4");
+        ratingLayout.add(ratingValue);
+        ratingLayout.add(ratingText);
+        background.add(ratingLayout);
+        
+        JLabel yeartitle = new JLabel("Choose an available year");
+        JPanel yeardisplay = new JPanel();
+        FlowLayout yearLayout = new FlowLayout();
+        yeardisplay.setLayout(yearLayout);
+        yearLayout.setHgap(10);
+        yeardisplay.add(yeartitle);
+        String[] yeararray = rw.getYear(name); //Gets list of years in directory
+        JComboBox yearlist = new JComboBox(yeararray);
+        yeardisplay.add(yearlist);
+        background.add(yeardisplay);
+        yearlist.addActionListener(yearlist);
+        
+        JLabel monthtitle = new JLabel("Choose an available month");
+        JPanel monthdisplay = new JPanel();
+        FlowLayout monthLayout = new FlowLayout();
+        monthdisplay.setLayout(monthLayout);
+        monthLayout.setHgap(10);
+        monthdisplay.add(monthtitle);
+        montharray = rw.getMonths(name, yearlist.getSelectedItem().toString());//Gets list of months
+        JComboBox monthlist = new JComboBox(montharray);
+        
+        monthdisplay.add(monthlist);
+        background.add(monthdisplay);
+        
+        JLabel daytitle = new JLabel("Choose an available day");
+        JPanel daydisplay = new JPanel();
+        FlowLayout dayLayout = new FlowLayout();
+        daydisplay.setLayout(yearLayout);
+        dayLayout.setHgap(10);
+        daydisplay.add(daytitle);
+        
+        monthFile = rw.monthNum(monthlist.getSelectedItem().toString());
+        dayarray = rw.getDays(name, yearlist.getSelectedItem().toString(), 
+               monthFile);//Gets list of days in months file
+        
+        JComboBox daylist = new JComboBox(dayarray);
+        daydisplay.add(daylist);
+        background.add(daydisplay);
+        
+        JButton save = new JButton("Save This Rating and Edit Another");
+        JButton exit = new JButton("Exit to Personal Trainer Main Menu");
+        
+        JPanel MVP = new JPanel(new FlowLayout());
+        MVP.add(save);
+        MVP.add(exit);
+        background.add(MVP);
+        JTextArea status = new JTextArea(1,20);
+        status.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //background.add(status);
+        background.add(Box.createVerticalGlue());
+        
+        yearlist.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                
+                monthlist.setModel(new DefaultComboBoxModel(rw.getMonths(name, 
+                        yearlist.getSelectedItem().toString())));
+                monthFile = rw.monthNum(monthlist.getSelectedItem().toString());
+                
+                daylist.setModel(new DefaultComboBoxModel(rw.getDays(name, 
+                        yearlist.getSelectedItem().toString(),monthFile)));
+              }
+        });
+        monthlist.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                monthFile = rw.monthNum(monthlist.getSelectedItem().toString());
+                status.setText(monthFile);
+                daylist.setModel(new DefaultComboBoxModel(rw.getDays(name, 
+                        yearlist.getSelectedItem().toString(),monthFile)));
+              }
+        });
+        daylist.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                rightside.setText("");
+                leftside.setText(monthlist.getSelectedItem().toString()+" "
+                        +daylist.getSelectedItem().toString()+", "+
+                        yearlist.getSelectedItem().toString());
+                
+                try{
+                String text = rw.getXPlan(name, yearlist.getSelectedItem().toString(),
+                        monthlist.getSelectedItem().toString(), daylist.getSelectedItem().toString());
+                rightside.setText(text);
+                text = rw.getXRatings(name, yearlist.getSelectedItem().toString(),
+                        monthlist.getSelectedItem().toString(), daylist.getSelectedItem().toString());
+                ratingText.setText(text);
+                }
+                catch (IOException ex) {
+                    System.out.println("File does not Exist");
+                }
+        }});
+        
+        save.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+            try {
+                PrintWriter textwriter = null;
+                String dayFile;
+                if (daylist.getSelectedItem() == null)
+                    dayFile = "00";
+                else 
+                    dayFile = daylist.getSelectedItem().toString();
+                
+                String filename = "H://"+name+"/XP/"+yearlist.getSelectedItem().toString()+
+                    "/"+monthFile+"/Ratings/"+dayFile+".txt";
+                
+                textwriter= new PrintWriter(filename, "UTF-8");
+                ratingText.write(textwriter);
+                textwriter.close();
+                } catch (FileNotFoundException ex) {
+                  System.out.println("File not found");
+                } catch (IOException ex) {
+                  System.out.println("Save button for modify");
+                }
+                new ViewPlans2(name);
+                dispose();
+            }});
+        
+        exit.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                dispose();
+            }});
+        
+        setVisible(true);
+        
+    }
+        
+}
     class ReadWrite {
         static String[] act;
         static String[] names;
@@ -1157,14 +1334,14 @@ class MakePlan extends JFrame{
         String str = ""; //Read each file from input
         Scanner fin;
         try {
-            File actdir = new File("C://Activities");
+            File actdir = new File("H://Activities");
             if (!actdir.exists()){
                 actdir.mkdir();
                 String[] tempacts = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
                                     "Sit-ups", "Warm-up", "Weights" };
                 WriteArray(tempacts);
                 }
-            fin = new Scanner(new File("C://activities/activities.txt"));
+            fin = new Scanner(new File("H://activities/activities.txt"));
             int n = fin.nextInt(); //Reads 1st character which represents the
         //number of string files to read
         fin.nextLine();
@@ -1187,11 +1364,11 @@ class MakePlan extends JFrame{
     public void WriteArray(String[] array){
         try{
             PrintWriter writer = null;
-            File actdir = new File("C://activities");
+            File actdir = new File("H://activities");
             if (!actdir.exists()){
                 actdir.mkdir();
             }
-            writer = new PrintWriter("C://activities/activities.txt", "UTF-8");
+            writer = new PrintWriter("H://activities/activities.txt", "UTF-8");
             writer.println(array.length);
             for (int i = 0; i < array.length; i++){
                 writer.println(array[i]);
@@ -1205,14 +1382,14 @@ class MakePlan extends JFrame{
     public void createNewFiles(String name){
         try {
             
-            File actMnthdir = new File("C://"+name+"/XP/2000/1/Ratings");
+            File actMnthdir = new File("H://"+name+"/XP/2000/1/Ratings");
             if (!actMnthdir.exists()){
                 actMnthdir.mkdirs();
-            PrintWriter textwriter = new PrintWriter("C://"+name+"/XP/2000/1/01.txt");
+            PrintWriter textwriter = new PrintWriter("H://"+name+"/XP/2000/1/01.txt");
             textwriter.print("\tSample Plan\n" +"	12:00 PM	Warm-up\n" +
                 "	12:10 PM	Running\n"+"	12:50 PM	Cooldown");
             textwriter.close();
-            textwriter = new PrintWriter("C://"+name+"/XP/2000/1/Ratings/01.txt");
+            textwriter = new PrintWriter("H://"+name+"/XP/2000/1/Ratings/01.txt");
             textwriter.print("5");
             textwriter.close();
             }
@@ -1251,7 +1428,7 @@ class MakePlan extends JFrame{
     
     public String[] getNames(){
         List<String> listOfNames = new ArrayList<String>();
-        File[] files = new File("C://").listFiles();
+        File[] files = new File("H://").listFiles();
         for (File namenum : files) {
             if (namenum.isDirectory()) {
             File nameverify = new File (namenum+"/"+namenum.getName()+"ExercisePref.txt");
@@ -1270,7 +1447,7 @@ class MakePlan extends JFrame{
     public String[] getYear(String name){
         try{
         listOfNames = new ArrayList<String>();
-        File[] files = new File("C://"+name+"/XP/").listFiles();
+        File[] files = new File("H://"+name+"/XP/").listFiles();
         for (File namenum : files) {
             if (namenum.isDirectory()) {
             listOfNames.add(namenum.getName());
@@ -1290,7 +1467,7 @@ class MakePlan extends JFrame{
     public String[] getMonths(String name, String year){
         List<String> listOfNames = new ArrayList<String>();
         try {
-        File[] files = new File("C://"+name+"/XP/"+year).listFiles();
+        File[] files = new File("H://"+name+"/XP/"+year).listFiles();
         for (File namenum : files) {
             if (namenum.isDirectory()) {
             listOfNames.add(namenum.getName());
@@ -1316,7 +1493,7 @@ class MakePlan extends JFrame{
     public String[] getDays(String name, String year, String month){
         List<String> listOfNames = new ArrayList<String>();
         try{
-        File[] files = new File("C://"+name+"/XP/"+year+"/"+month).listFiles();
+        File[] files = new File("H://"+name+"/XP/"+year+"/"+month).listFiles();
         for (File namenum : files) {
             if (namenum.isFile()) {
                 listOfNames.add(namenum.getName().substring(0, 2));
@@ -1338,7 +1515,7 @@ class MakePlan extends JFrame{
         String Xplan = "";
         month = monthNum(month);
         try {
-        FileReader Xplanfile = new FileReader ("C://"+name+"/XP/"+year+"/"+month+"/"+day+".txt");
+        FileReader Xplanfile = new FileReader ("H://"+name+"/XP/"+year+"/"+month+"/"+day+".txt");
         Xplan = new Scanner(Xplanfile).useDelimiter("\\Z").next();
         }
         catch (IOException ex) {
@@ -1480,7 +1657,7 @@ class MakePlan extends JFrame{
         String Xplan = "";
         month = monthNum(month);
         try {
-        FileReader Xplanfile = new FileReader ("C://"+name+"/XP/"+year+"/"+month+"/Ratings/"+day+".txt");
+        FileReader Xplanfile = new FileReader ("H://"+name+"/XP/"+year+"/"+month+"/Ratings/"+day+".txt");
         Xplan = new Scanner(Xplanfile).useDelimiter("\\Z").next();
         }
         catch (IOException ex) {
