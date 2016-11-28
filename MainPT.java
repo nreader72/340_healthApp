@@ -29,18 +29,22 @@ import java.util.List;
  */
 public class MainPT {
     public static void main(String[] args) throws FileNotFoundException {
-        //String name = "Jill";
+        //String name = "David";
         //String[] things = { "Cooldown", "Elliptical", "Hiking", "Pushups", "Running", 
         //   "Sit-ups", "Warm-up", "Weights" };//Demo equipment list
         new PT();
-        //new SAP(0);
-        //new ViewPlans2(name);
-        //new Modify(name);
+        //new SAP(0, things);
+        
         //new MakePlan(name, things);
+        
+        //new ViewPlans(name);
+        
         //new ViewActivities(things);
         //new Create(things);
-        //new ModifySelect();
+        //new ModifySelect(things);
         
+        //new ViewPlans2(name);
+        //new Modify(name);
     }
 }
     class PT extends JFrame{
@@ -354,7 +358,7 @@ class MakePlan extends JFrame{
         
         JLabel actDescripLabel = new JLabel("Activity Description");
         actDescripLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JTextArea actDescrip = new JTextArea(10, 40);
+        JTextArea actDescrip = new JTextArea(10, 30);
         JScrollPane actDescriPane = new JScrollPane(actDescrip);
         actDescrip.setEditable(false);
         bottomleftPane.add(actDescripLabel);
@@ -362,7 +366,7 @@ class MakePlan extends JFrame{
         
         JLabel prefDescripLabel = new JLabel("Personal Preferences");
         prefDescripLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JTextArea prefDescrip = new JTextArea(10, 40);
+        JTextArea prefDescrip = new JTextArea(10, 30);
         JScrollPane prefDescriPane = new JScrollPane(prefDescrip);
         prefDescrip.setEditable(false);
         reader = null;
@@ -378,7 +382,7 @@ class MakePlan extends JFrame{
         
         JLabel ratDescripLabel = new JLabel("Personal Activity Ratings");
         ratDescripLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        JTextArea ratDescrip = new JTextArea(10, 40);
+        JTextArea ratDescrip = new JTextArea(10, 30);
         JScrollPane ratDescriPane = new JScrollPane(ratDescrip);
         ratDescrip.setEditable(false);
         reader = null;
@@ -886,6 +890,7 @@ class MakePlan extends JFrame{
                dispose();
             }});
         background.add(exit);
+        background.add(Box.createVerticalGlue());
         setVisible(true);
         //pack();
     }
@@ -991,9 +996,10 @@ class MakePlan extends JFrame{
             
             bottomlist.add(save);    
             bottomlist.add(exit);
+            background.add(Box.createVerticalGlue());
             background.add(bottomlist);
-            background.add(statustxt);
-            
+            //background.add(statustxt);
+            background.add(Box.createVerticalGlue());
             //pack();
             setVisible(true);
             
@@ -1006,8 +1012,7 @@ class MakePlan extends JFrame{
             
         public ModifySelect(String[] actlist){
             super("Modify Selected Activity");
-            setLayout(new FlowLayout());
-            setSize(700,600);
+            setSize(600,500);
             
             things = actlist;
             
@@ -1057,7 +1062,7 @@ class MakePlan extends JFrame{
             JPanel bottomlist = new JPanel();
             FlowLayout bottomLayout = new FlowLayout();
             bottomlist.setLayout(bottomLayout);
-            bottomLayout.setHgap(30);
+            bottomLayout.setHgap(5);
             
             JButton cont = new JButton("Modify Selected Item");
             cont.addActionListener(new ActionListener(){
@@ -1100,8 +1105,9 @@ class MakePlan extends JFrame{
             bottomlist.add(cont);
             bottomlist.add(save);
             bottomlist.add(exit);
-            background.add(bottomlist);
             
+            background.add(bottomlist);
+            background.add(Box.createVerticalGlue());
             //pack();
             setVisible(true);
         }
