@@ -1,4 +1,4 @@
-package prideHealth;
+//package prideHealth;
 
 /*Jeremy Hutton
 340 software engineering
@@ -20,10 +20,12 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
+import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,26 +49,21 @@ import javax.swing.ButtonGroup;
 
 
 
+
 public  class mealPlannerGUI extends JFrame implements ActionListener,Serializable {
     
-    static String item;
-    static String itemType;
-    static String description;
-    static String calories;
+    //static String item;
+    //static String itemType;
+    //static String description;
+    //static String calories;
     HashMap<String, ArrayList> itemMap = new HashMap<>();
-    HashMap<String, ArrayList> mealMap = new HashMap<>();
-    static String beverage;
-    static String mainItem;
-    static String sideItem;
-    static String sideItem2;
-    static String dessert;
-    static String day;
-    static String mealType;
-    static String calDay;
-    static String type;
-    static String prevDay;
-    static String prevType;
-       
+    
+    //static String beverage;
+    //static String mainItem;
+    //static String sideItem;
+    //static String sideItem2;
+    //static String dessert;
+    
     public static void main(String[] args) throws BadLocationException, IOException {
 		        
         //draws background for application
@@ -174,9 +171,13 @@ public  void MealPlanner(JPanel panel) {
     mealPlanChoice4.addActionListener(new ActionListener(){
     @Override
     public void actionPerformed(ActionEvent e){
-        JPanel panel = new JPanel();
-        Calendar(panel);
-        makeJFrame(panel, "Meal Plan Calendar", 500, 350);
+        try {
+            JPanel panel = new JPanel();
+            Calendar(panel);
+            makeJFrame(panel, "Meal Plan Calendar", 500, 350);
+        } catch (IOException ex) {
+            Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
                        
     }
     });
@@ -199,298 +200,22 @@ public  void MealPlanner(JPanel panel) {
 method that builds the inner workings of a window that displays previous menus
 */
 public  void PreviousMenus(final JPanel panel) throws BadLocationException, IOException, InterruptedException{
+    PrevMenus previousMenus = new PrevMenus();
     
-    panel.setLayout(null);
-    
-    MealPlan map = new MealPlan();
-    
-    final Map<String,ArrayList> newMap = map.mapFromFile("previousMenus.txt");
-    
-    System.out.println(newMap.get("SundayDinner"));
-    
-    final ArrayList keyList = new ArrayList(newMap.keySet());
-    
-    System.out.println(keyList.get(1));
-    
-    
-    
-    
-    final JTextArea eventHandler = new JTextArea("Beverage: " + newMap.get("SundayDinner").get(0).toString().replace("[","")
-     + "\n" + "Main Item: " + newMap.get("SundayDinner").get(1).toString().replace("[","") + "\n" +
-            "Side Item: " + newMap.get("SundayDinner").get(2).toString().replace("[","") + "\n" + 
-            "Side Item: " + newMap.get("SundayDinner").get(3).toString().replace("[","") + "\n" +
-            "Dessert: " + newMap.get("SundayDinner").get(4).toString().replace("[","") + "\n" + 
-            "Ratings: " + newMap.get("SundayDinner").get(5).toString().replace("]",""));
-        eventHandler.setBounds(100,50,300,150);
-        eventHandler.setEditable(false);
-        panel.add(eventHandler);
-        
-        
-    
-    JButton addPlan = new JButton("Add Previous Meal Plan");
-    addPlan.setBounds(175,400,200,25);
-    addPlan.addActionListener(new ActionListener(){
-    @Override
-    public void actionPerformed(ActionEvent e){
-        JPanel panel = new JPanel();
-        makeJFrame(panel, "Description,Caloric Content, Ratings", 400, 200);
-        JTextArea eventHandler = new JTextArea("Spaghetti in a maranara sauce with "
-                + "sausage meatballs." + "\n" + "Calories: 800" + "\n"
-                + "Ratings: 4");
-        eventHandler.setBounds(10,150,300,150);
-        panel.add(eventHandler);
-        }
-    });      
-    
-    
-    JButton next = new JButton("Next");
-    next.setBounds(200,225,75,25);
-    
-    next.addActionListener(new ActionListener(){
-    int counter = 1;    
-    @Override
-    public void actionPerformed(ActionEvent e){
-        
-    if(counter<keyList.size()){
-            
-            eventHandler.setText("Beverage: " + newMap.get(keyList.get(counter)).get(0).toString().replace("[","")
-     + "\n" + "Main Item: " + newMap.get(keyList.get(counter)).get(1).toString().replace("[","") + "\n" +
-            "Side Item: " + newMap.get(keyList.get(counter)).get(2).toString().replace("[","") + "\n" + 
-            "Side Item: " + newMap.get(keyList.get(counter)).get(3).toString().replace("[","") + "\n" +
-            "Dessert: " + newMap.get(keyList.get(counter)).get(4).toString().replace("[","") + "\n" + 
-            "Ratings: " + newMap.get(keyList.get(counter)).get(5).toString().replace("]",""));
-        //eventHandler.setBounds(10,150,300,150);
-        //eventHandler.setEditable(false);
-        
-        panel.add(eventHandler);
-        counter++;
-        }
-    }
-    });
-    
-    
-    String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-                                "Friday", "Saturday", "Sunday"};
-    
-    final JComboBox<String> choiceBox1 = new JComboBox<>(days);
-    makeLabel(panel,"Please Select a Day and Type:", 10, 350, 200,25);
-    choiceBox1.setBounds(200,350,100,25); 
-    panel.add(choiceBox1);
-    
-    choiceBox1.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                prevDay = choiceBox1.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-    
-    String[] mealTypes = new String[] {"Breakfast", "Lunch","Dinner"};
-    
-    final JComboBox<String> choiceBox2 = new JComboBox<>(mealTypes);
-    makeLabel(panel,"If you wish to add this plan,", 10, 300, 200,25);
-    choiceBox2.setBounds(325,350,100,25);
-    panel.add(choiceBox2);
-    
-    choiceBox2.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                prevType = choiceBox2.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-   
-    panel.add(next);
-    panel.add(addPlan);   
+    previousMenus.displayPlan(panel);
+       
 }
  
 /*
 method that builds a window that allows user to create menu item, description and caloric content
 */
 public void MenuItem(JPanel panel) throws FileNotFoundException{
-
-    panel.setLayout(null);
-    String[] menuTypes = new String[] {"Beverage", "Main Item", "Side Item", "Dessert"};
     
-    final JComboBox<String> choiceBox = new JComboBox<>(menuTypes);
-    makeLabel(panel,"Please Choose a Menu Type", 20, 10, 200,25);
-    choiceBox.setBounds(250,10,100,25); 
-    choiceBox.addActionListener(new ActionListener(){
-    @Override
-    public void actionPerformed(ActionEvent e){
-        //FileWriter fileWriter = null;
-        //try {
-             itemType = choiceBox.getSelectedItem().toString();
-
-        
-    }
-    });    
+    MenuItem createItems = new MenuItem();
     
-    //makes a text field with mock input
-    JLabel menuItem = new JLabel("Menu Item:");
-    menuItem.setBounds(20, 100, 100,25);
-    panel.add(menuItem);
-    final JTextField menuField = new JTextField();
-    menuField.setBounds(250, 100, 250, 25);
+    createItems.setItem(panel);
+
     
-    menuField.addActionListener(new ActionListener(){
-   @Override
-   public void actionPerformed(ActionEvent e){
-       
-         }
-    });
-    //makes a text field with mock description input
-    JLabel menuDescription = new JLabel("Menu Item Description:");
-    menuDescription.setBounds(20, 150, 150,25);
-    panel.add(menuDescription);
-    final JTextField descriptionField = new JTextField();
-    descriptionField.setBounds(250, 150, 250, 25);
-    
-    descriptionField.addActionListener(new ActionListener(){
-   public void actionPerformed(ActionEvent e){
-      
-   }
-    });
-    
-    //makes a text field with mock caloric content input
-    JLabel caloricContent = new JLabel("Caloric Content:");
-    caloricContent.setBounds(20, 200, 100,25);
-    panel.add(caloricContent);
-    final JTextField caloricField = new JTextField();
-    caloricField.setBounds(250, 200, 250, 25);
-    
-    caloricField.addActionListener(new ActionListener(){
-   public void actionPerformed(ActionEvent e){
-      
-   }
-    });
-    
-    
-        
-    
-
-        String[] users = new String[] {"Jeremy", "David", "Preston"};
-        JComboBox<String> choiceBox2 = new JComboBox<>(users);
-        makeLabel(panel,"View Preferences of:  ", 75, 285, 200,25);
-        choiceBox2.setBounds(250,285,150,25);
-        panel.add(choiceBox2);
-        choiceBox2.addActionListener(new ActionListener(){
-    @Override
-    public void actionPerformed(ActionEvent e){
-        JPanel panel = new JPanel();
-        makeJFrame(panel, "Family Member Preferences", 400, 200);
-        String user = "blah";
-        MenuItem object1 = new MenuItem(); 
-        try {
-            String blah = object1.displayPreferences(user);
-                    JTextArea eventHandler2 = new JTextArea(blah);
-                    eventHandler2.setEditable(false);
-       eventHandler2.setBounds(10,150,300,300);
-        panel.add(eventHandler2);
-       
-//
-//
-//object1.displayPreferences(user);
-        } catch (IOException ex) {
-            Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        
-        }
-    });
-    
-    JButton createItemButton = new JButton("Create Item");
-    createItemButton.setBounds(250, 315, 150, 25);
-    panel.add(createItemButton);
-    panel.add(choiceBox);
-    panel.add(menuField);
-    panel.add(caloricField);
-    panel.add(descriptionField);
-    createItemButton.addActionListener(new ActionListener(){
-    @Override
-    public void actionPerformed(ActionEvent e){
-        
-        //try {
-            
-           String item1 = menuField.getText();
-            description = descriptionField.getText();
-            calories = caloricField.getText();
-            
-            
-            //FileOutputStream fos=null;
-            try {
-                
-                ArrayList itemElements = new ArrayList();
-                itemElements.add(itemType);
-                itemElements.add(description);
-                itemElements.add(calories);
-                
-                itemMap.put(item1,itemElements);
-                
-Properties properties = new Properties();
-
-
-for (Map.Entry<String,ArrayList> entry : itemMap.entrySet()) {
-    properties.put(entry.getKey(), entry.getValue().toString());
-}
-
-
-
-FileOutputStream fos = new FileOutputStream(("itemMenu.txt"), true);
-properties.store(fos,null);
-
-AvailableItem object = new AvailableItem();
-//object.getAvailableItem("[Beverage");
-
-                          
-
-
-            }   catch (FileNotFoundException ex) {
-                Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-//            FileInputStream fis;
-//            
-//            
-//            fis = new FileInputStream("itemMenu.txt");
-//            
-//            
-//            ResourceBundle resources;
-//        
-//            resources = new PropertyResourceBundle(fis);
-//        
-//            Map<String,String> map = new HashMap<String,String>();
-//
-//            //convert ResourceBundle to Map
-//            Enumeration<String> keys = resources.getKeys();
-//            while (keys.hasMoreElements()) {
-//                String key = keys.nextElement();
-//                map.put(key, (resources.getString(key)));
-//                
-//            }
-            //String s = map.get("blah");
-            //String [] items = s.split(",");
-            //List<String> itemList = new ArrayList<String>(Arrays.asList(items));
-
-
-//            String list = Arrays.toString(itemList.toArray()).replace("[", "").replace("]", "");
-//            List<String> itemList2 = new ArrayList<String>(Arrays.asList(list));
-//            
-            
-            
-       // }   catch (FileNotFoundException ex) {
-          //  Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (IOException ex) {
-//            Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    
-   // }
-       
-    });
 }
 /*
 method that builds a window that allows user to choose menu items based on family members
@@ -498,154 +223,11 @@ preferences and restrictions
 */
 public  void MealPlan(JPanel panel) throws IOException{
     
-    panel.setLayout(null);
+    MealPlan createPlans = new MealPlan();
     
-    String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-                                "Friday", "Saturday", "Sunday"};
-    
-    final JComboBox<String> choiceBox1 = new JComboBox<>(days);
-    makeLabel(panel,"Please Choose a Day:", 10, 10, 200,25);
-    choiceBox1.setBounds(250,10,100,25); 
-    panel.add(choiceBox1);
-    
-    choiceBox1.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                day = choiceBox1.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-    
-    String[] mealTypes = new String[] {"Breakfast", "Lunch","Dinner"};
-    
-    final JComboBox<String> choiceBox2 = new JComboBox<>(mealTypes);
-    makeLabel(panel,"Please Choose a Meal Type:", 10, 60, 200,25);
-    choiceBox2.setBounds(250,60,100,25);
-    panel.add(choiceBox2);
-    
-    choiceBox2.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                mealType = choiceBox2.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
+    createPlans.makePlan(panel);
     
     
-    JLabel userLabel = new JLabel("Available Menu Items Based on Preferences and Restricitions");
-    userLabel.setBounds(10, 100, 400, 25);
-    panel.add(userLabel);
-    
-//            
-    
-    
-    
-            
-            AvailableItem availBevItems = new AvailableItem();
-            List<String> availableBev = new ArrayList<String>(availBevItems.getAvailableItem("[" + "Beverage"));
-            Object[] availBevList = availableBev.toArray();
-            final JComboBox<Object> BevBox3 = new JComboBox<>(availBevList);
-            makeLabel(panel,"Please Choose a Beverage: ", 10, 150, 200,25);
-            BevBox3.setBounds(250,150,100,25);
-            panel.add(BevBox3);
-            
-            
-            BevBox3.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                beverage = BevBox3.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-            AvailableItem availMainItems = new AvailableItem();
-            List<String> availableMain = new ArrayList<String>(availMainItems.getAvailableItem("[" + "Main Item"));
-            Object[] availMainList = availableMain.toArray();
-            final JComboBox<Object> MainBox = new JComboBox<>(availMainList);
-            makeLabel(panel,"Please Choose a Main Item: ", 10, 200, 200,25);
-            MainBox.setBounds(250,200,100,25);
-            panel.add(MainBox);
-            
-            
-            MainBox.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                mainItem = MainBox.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-            
-            AvailableItem availSideItem1 = new AvailableItem();
-            List<String> availableSideItem1 = new ArrayList<String>(availSideItem1.getAvailableItem("[" + "Side Item"));
-            Object[] availSideList1 = availableSideItem1.toArray();
-            final JComboBox<Object> SideBox1 = new JComboBox<>(availSideList1);
-            makeLabel(panel,"Please Choose a Side Item: ", 10, 250, 200,25);
-            SideBox1.setBounds(250,250,100,25);
-            panel.add(SideBox1);
-            
-            
-            SideBox1.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                sideItem = SideBox1.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-            
-            AvailableItem availSideItem2 = new AvailableItem();
-            List<String> availableSideItem2 = new ArrayList<String>(availSideItem2.getAvailableItem("[" + "Side Item"));
-            Object[] availSideList2 = availableSideItem2.toArray();
-            final JComboBox<Object> SideBox2 = new JComboBox<>(availSideList2);
-            makeLabel(panel,"Please Choose a Second Side Item: ", 10, 300, 235,25);
-            SideBox2.setBounds(250,300,100,25);
-            panel.add(SideBox2);
-            
-            
-            SideBox2.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                sideItem2 = SideBox2.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-            
-            AvailableItem availDessertItem = new AvailableItem();
-            List<String> availableDessertItem = new ArrayList<String>(availDessertItem.getAvailableItem("[" + "Dessert"));
-            Object[] availDessertList = availableDessertItem.toArray();
-            final JComboBox<Object> DessertBox1 = new JComboBox<>(availDessertList);
-            makeLabel(panel,"Please Choose a Dessert: ", 10, 350, 200,25);
-            DessertBox1.setBounds(250,350,100,25);
-            panel.add(DessertBox1);
-            
-            
-            DessertBox1.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                dessert = DessertBox1.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-        
-    JButton mealPlanChoice1 = new JButton("Create Plan");
-    mealPlanChoice1.setBounds(100, 445, 175, 50);
-    panel.add(mealPlanChoice1);
-    mealPlanChoice1.addActionListener(new ActionListener(){
-    @Override
-    public void actionPerformed(ActionEvent e){
-        MealPlan plan = new MealPlan();
-        plan.setPlan(day, mealType, beverage, mainItem, 
-                        sideItem, sideItem2,dessert);            
-    }
-    });
-    
-    
-           
     }
 
 
@@ -671,112 +253,9 @@ public JRadioButton getSelectedRadioButton(ButtonGroup buttonGroup) {
 method that builds a calendar with meals for the week
 */
         
-public  void Calendar(final JPanel panel){
-    
-    panel.setLayout(null);
-    
-    
-    
-    //creates breakfast, lunch and dinner labels
-    JLabel instruction = new JLabel("Display Meal Plan For: ");
-    instruction.setBounds(10, 25, 200, 25);
-    panel.add(instruction);
-    
-    String[] mealTypes = new String[] {"Breakfast", "Lunch","Dinner"};
-    
-    String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
-                                "Friday", "Saturday", "Sunday"};
-    
-    final JComboBox<String> choiceBox1 = new JComboBox<>(days);
-    makeLabel(panel,"Please Choose a Day", 10, 75, 200,25);
-    choiceBox1.setBounds(250,75,100,25);
-    panel.add(choiceBox1);
-    
-    choiceBox1.addActionListener(new ActionListener(){
-        
-            @Override
-            public void actionPerformed(ActionEvent e){
-                 
-               calDay = choiceBox1.getSelectedItem().toString();
-                
-                }
-                   
-    }); 
-    
-    
-    final JComboBox<String> choiceBox2 = new JComboBox<>(mealTypes);
-    makeLabel(panel,"Please Choose a Meal Type: ", 10, 125, 200,25);
-    choiceBox2.setBounds(250,125,100,25);
-    panel.add(choiceBox2);
-     
-    choiceBox2.addActionListener(new ActionListener(){
-        
-            @Override
-            public void actionPerformed(ActionEvent e){
-                
-                    type  = choiceBox2.getSelectedItem().toString();
-            }            
-    }); 
-    
-    JButton displayCal = new JButton("Display Calendar");
-    displayCal.setBounds(200, 225, 150, 35);
-    panel.add(displayCal);
-    
-    displayCal.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                FileInputStream menuItemFile = null;
-                try {
-                    JPanel newPanel = new JPanel();
-                    makeJFrame(newPanel, calDay + " " + type, 300,300);
-                    menuItemFile = new FileInputStream("mealPlan.txt");
-                    ResourceBundle resources;
-                    resources = new PropertyResourceBundle(menuItemFile);
-                    Map<String,String> map = new HashMap<String,String>();
-                    //convert ResourceBundle to Map
-                    Enumeration<String> keys = resources.getKeys();
-                    while (keys.hasMoreElements()) {
-                        String key = keys.nextElement();
-                        map.put(key, (resources.getString(key)));
-                        
-                    }       //turns the string of attributes into an arrayList which reassembles the original hash
-                    Map<String,ArrayList> newMap = new HashMap<String,ArrayList>();
-                    List<String> keysList = new ArrayList<String>(map.keySet());
-                    for(int i = 0; i<keysList.size();i++){
-                        String values = map.get(keysList.get(i));
-                        String [] items = values.split(",");
-                        ArrayList<String> itemList = new ArrayList<String>(Arrays.asList(items));
-                        newMap.put(keysList.get(i),itemList);
-                        
-                        
-                    }
-                    System.out.println(newMap);
-                    //JTextField calendarContent = new JTextField("success");
-                    System.out.println(newMap.keySet());
-                        System.out.println(day + type);
-                        //this needs to be formatted differently and the brackets taken away!!!!
-                        JLabel calendarContent = new JLabel(newMap.get(calDay + type).toString() + 
-                                newMap.get(calDay + type).get(0));
-                        //calendarContent.setEditable(false);
-                        calendarContent.setBounds(20, 50, 250, 250);
-                        newPanel.add(calendarContent);
-                
-                } catch (FileNotFoundException ex) {
-                    Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    try {
-                        menuItemFile.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                
-                }
-                   
-    }); 
-    
+public  void Calendar(JPanel panel) throws IOException{
+     Calendar displayCal = new Calendar();
+     displayCal.makeCalendar(panel);
     
      
 }
@@ -895,7 +374,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
         
         public List getAvailableItem(String menuType) throws IOException{
             //gets preference list
-            Scanner s = new Scanner(new File("menuItem.txt"));
+            Scanner s = new Scanner(new File("C://" + "PrideHealthMangement", "Pref.txt"));
             ArrayList<String> preferenceList = new ArrayList<String>();
             while (s.hasNext()){
             preferenceList.add(s.next());
@@ -965,17 +444,6 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
          
         }  
         
-        public void getItem(){
-            String file = "menuItem.txt";
-            //here you need to just get the names of items in the hash that are the menu items
-            
-        }
-        
-        public void deterAvail(){
-            
-            
-        }
-        
         public ArrayList<String> getUsers(String file) throws FileNotFoundException, IOException{
             
             ArrayList<String> users = new ArrayList<String>();
@@ -1002,7 +470,14 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
     
     ////////////////////////////////////////////////////////DATA LAYER
      public class PrevMenus extends mealPlannerGUI{
-        
+         private String prevDay;
+        private String prevType;
+        private String bev;
+        private String main;
+        private String sideItem;
+        private String sideItem2;
+        private String dessert;
+        private boolean isClicked;
         public MealPlan getPlan(){
             
             
@@ -1015,24 +490,261 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             return null;
         }
         
-        public void displayPlan(){
+        private void displayPlan(final JPanel panel) throws IOException{
+            panel.setLayout(null);
+    
+        MealPlan map = new MealPlan();
+
+        final Map<String,ArrayList> newMap = map.mapFromFile("previousMenus.txt");
+
+        
+
+        final ArrayList keyList = new ArrayList(newMap.keySet());
+
+        System.out.println(keyList.get(1));
+
+
+        final JTextArea eventHandler = new JTextArea();
+
+     
+            eventHandler.setEditable(false);
+            panel.add(eventHandler);
             
+        final JButton addPlan = new JButton("Add Previous Meal Plan");
+                addPlan.setBounds(175,400,200,25);
+                panel.add(addPlan);    
+
+        JButton next = new JButton("View Plan");
+        next.setBounds(200,225,100,25);
+        next.addActionListener(new ActionListener(){
+        int counter = 0;    
+        @Override
+        public void actionPerformed(ActionEvent e){
+        
+        if(counter<keyList.size()){
+                isClicked = false;
+            
+                eventHandler.setText("Beverage: " + newMap.get(keyList.get(counter)).get(0).toString().replace("[","")
+                        + "\n" + "Main Item: " + newMap.get(keyList.get(counter)).get(1).toString().replace("[","") + "\n" +
+                        "Side Item: " + newMap.get(keyList.get(counter)).get(2).toString().replace("[","") + "\n" +
+                        "Side Item: " + newMap.get(keyList.get(counter)).get(3).toString().replace("[","") + "\n" +
+                        "Dessert: " + newMap.get(keyList.get(counter)).get(4).toString().replace("[","") + "\n" +
+                        "Ratings: " + newMap.get(keyList.get(counter)).get(5).toString().replace("]",""));
+                
+                
+                eventHandler.setBounds(100,50,300,150);
+                panel.add(eventHandler);
+                
+                
+                        
+                         bev = newMap.get(keyList.get(counter)).get(0).toString().replace("[","");
+                         main = newMap.get(keyList.get(counter)).get(1).toString().replace("[","");
+                         sideItem = newMap.get(keyList.get(counter)).get(2).toString().replace("[","");
+                         sideItem2 = newMap.get(keyList.get(counter)).get(3).toString().replace("[","");
+                         dessert = newMap.get(keyList.get(counter)).get(4).toString().replace("[","");
+                        addPlan.addActionListener(new ActionListener(){
+        @Override
+        public void actionPerformed(ActionEvent e){
+
+            try {
+                isClicked = true;
+                if(isClicked == true){
+                MealPlan obj = new MealPlan();
+                obj.setPlan(prevDay,prevType,bev,main,sideItem,sideItem2,dessert);
+                }
+                isClicked = false;
+                
+                
+            } catch (IOException ex) {
+                Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+                
+            
+            }
+        
+        });
+        
+                        
+                      counter++;
+        }
+                    }
+                });
+        
+
+        String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+                                    "Friday", "Saturday", "Sunday"};
+
+        final JComboBox<String> choiceBox1 = new JComboBox<>(days);
+        makeLabel(panel,"Please Select a Day and Type:", 10, 350, 200,25);
+        choiceBox1.setBounds(200,350,100,25); 
+        panel.add(choiceBox1);
+
+        choiceBox1.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e){
+                    prevDay = choiceBox1.getSelectedItem().toString();
+
+                    }
+
+        }); 
+
+        String[] mealTypes = new String[] {"Breakfast", "Lunch","Dinner"};
+
+        final JComboBox<String> choiceBox2 = new JComboBox<>(mealTypes);
+        makeLabel(panel,"If you wish to add this plan,", 10, 300, 200,25);
+        choiceBox2.setBounds(325,350,100,25);
+        panel.add(choiceBox2);
+
+        choiceBox2.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e){
+                    prevType = choiceBox2.getSelectedItem().toString();
+
+                    }
+
+        }); 
+
+        panel.add(next);
+        
+
         }    
     }
     public class MenuItem extends mealPlannerGUI{
         String input;
         String itemType;
         String item;
-        String description;
-        int calories;
+        //String description;
+        String calories;
         
-        public void MenuItem(String newItem, String newDescription,int newCalories){
+        public void MenuItem(String newItem, String newDescription,String newCalories){
             item = newItem;
-            description = newDescription;
+            //description = newDescription;
             calories = newCalories;
         }
         
-        private void setItem(){
+        private void setItem(JPanel panel){
+            panel.setLayout(null);
+    String[] menuTypes = new String[] {"Beverage", "Main Item", "Side Item", "Dessert"};
+    
+    final JComboBox<String> choiceBox = new JComboBox<>(menuTypes);
+    makeLabel(panel,"Please Choose a Menu Type", 20, 10, 200,25);
+    choiceBox.setBounds(250,10,100,25); 
+    choiceBox.addActionListener(new ActionListener(){
+    @Override
+    public void actionPerformed(ActionEvent e){
+        //FileWriter fileWriter = null;
+        //try {
+             itemType = choiceBox.getSelectedItem().toString();
+
+        
+    }
+    });    
+    
+    //makes a text field with mock input
+    JLabel menuItem = new JLabel("Menu Item:");
+    menuItem.setBounds(20, 115, 100,25);
+    panel.add(menuItem);
+    final JTextField menuField = new JTextField();
+    menuField.setBounds(250, 115, 250, 25);
+    
+    menuField.addActionListener(new ActionListener(){
+   @Override
+   public void actionPerformed(ActionEvent e){
+       
+         }
+    });
+    
+    //makes a text field with mock caloric content input
+    JLabel caloricContent = new JLabel("Caloric Content:");
+    caloricContent.setBounds(20, 185, 100,25);
+    panel.add(caloricContent);
+    final JTextField caloricField = new JTextField();
+    caloricField.setBounds(250, 185, 250, 25);
+    
+    caloricField.addActionListener(new ActionListener(){
+   public void actionPerformed(ActionEvent e){
+      
+   }
+    });
+        String[] users = new String[] {"Jeremy", "David", "Preston"};
+        JComboBox<String> choiceBox2 = new JComboBox<>(users);
+        makeLabel(panel,"View Preferences of:  ", 75, 285, 200,25);
+        choiceBox2.setBounds(250,285,150,25);
+        panel.add(choiceBox2);
+        choiceBox2.addActionListener(new ActionListener(){
+    @Override
+    public void actionPerformed(ActionEvent e){
+        JPanel panel = new JPanel();
+        makeJFrame(panel, "Family Member Preferences", 400, 200);
+        String user = "blah";
+        MenuItem object1 = new MenuItem(); 
+        try {
+            String blah = object1.displayPreferences(user);
+                    JTextArea eventHandler2 = new JTextArea(blah);
+                    eventHandler2.setEditable(false);
+       eventHandler2.setBounds(10,150,300,300);
+        panel.add(eventHandler2);
+       
+//
+//
+//object1.displayPreferences(user);
+        } catch (IOException ex) {
+            Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+        }
+    });
+    
+        JButton createItemButton = new JButton("Create Item");
+        createItemButton.setBounds(250, 315, 150, 25);
+        panel.add(createItemButton);
+        panel.add(choiceBox);
+        panel.add(menuField);
+        panel.add(caloricField);
+        createItemButton.addActionListener(new ActionListener(){
+        @Override
+        public void actionPerformed(ActionEvent e){
+
+        //try {
+            
+           String item1 = menuField.getText();
+            //description = descriptionField.getText();
+            calories = caloricField.getText();
+            
+            try {
+                
+                ArrayList itemElements = new ArrayList();
+                itemElements.add(itemType);
+                //itemElements.add(description);
+                itemElements.add(calories);
+                
+                itemMap.put(item1,itemElements);
+                
+                Properties properties = new Properties();
+
+
+                for (Map.Entry<String,ArrayList> entry : itemMap.entrySet()) {
+                    properties.put(entry.getKey(), entry.getValue().toString());
+                }
+
+
+
+                FileOutputStream fos = new FileOutputStream(("itemMenu.txt"), true);
+                properties.store(fos,null);
+
+            }   catch (FileNotFoundException ex) {
+                Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            
+        }
+    
+   
+       
+    });
             
         }
         
@@ -1062,8 +774,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             List<String> itemList = new ArrayList<String>(Arrays.asList(items));
             String value = itemList.get(index);
 
-//            String list = Arrays.toString(itemList.toArray()).replace("[", "").replace("]", "");
-//            List<String> itemList2 = new ArrayList<String>(Arrays.asList(list));
+
             return value;
         }
         
@@ -1077,23 +788,26 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
         private String beverage;
         private String mainItem;
         private String sideItem;
+        private String sideItem2;
         private String dessert;
         
         public void MealPlan(String newDay, String newMealType, String newBeverage, 
-                String newMainItem, String newSideItem, String newDessert){
+                String newMainItem, String newSideItem, String newSideItem2, String newDessert){
             
             day = newDay;
             mealType = newMealType;
             beverage = newBeverage;
             mainItem = newMainItem;
             sideItem = newSideItem;
+            sideItem2 = newSideItem2;
             dessert = newDessert;
             
         }
         
-        private void setPlan(String day, String type, String bev, String mainDish, 
-                        String sideDish, String sideDish2,String dessertItem) {
-            try {
+        void setPlan(String day, String type, String bev, String mainDish, 
+                        String sideDish, String sideDish2,String dessertItem) throws FileNotFoundException, IOException {
+            
+           try {
             String key = day + type;
             ArrayList itemElements = new ArrayList();
             itemElements.add(bev);
@@ -1101,6 +815,8 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             itemElements.add(sideDish);
             itemElements.add(sideDish2);
             itemElements.add(dessertItem);
+            
+             HashMap<String, ArrayList> mealMap = new HashMap<>();
             
             mealMap.put(key,itemElements);
             
@@ -1123,8 +839,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
     
-        
-    }
+        }
         public Map<String,ArrayList> mapFromFile(String file) throws FileNotFoundException, IOException{
             
                     FileInputStream mapFile = new FileInputStream(file);
@@ -1178,10 +893,156 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
         }
        
         
-        public MenuItem getItem(MenuItem item){
+        private void makePlan(JPanel panel) throws IOException{
+            panel.setLayout(null);
+    
+        String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+                                    "Friday", "Saturday", "Sunday"};
+
+        final JComboBox<String> choiceBox1 = new JComboBox<>(days);
+        makeLabel(panel,"Please Choose a Day:", 10, 10, 200,25);
+        choiceBox1.setBounds(250,10,100,25); 
+        panel.add(choiceBox1);
+
+        choiceBox1.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e){
+                    day = choiceBox1.getSelectedItem().toString();
+
+                    }
+
+        }); 
+
+        String[] mealTypes = new String[] {"Breakfast", "Lunch","Dinner"};
+
+        final JComboBox<String> choiceBox2 = new JComboBox<>(mealTypes);
+        makeLabel(panel,"Please Choose a Meal Type:", 10, 60, 200,25);
+        choiceBox2.setBounds(250,60,100,25);
+        panel.add(choiceBox2);
+
+        choiceBox2.addActionListener(new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e){
+                    mealType = choiceBox2.getSelectedItem().toString();
+
+                    }
+
+        }); 
+    
+    
+            JLabel userLabel = new JLabel("Available Menu Items Based on Preferences and Restricitions");
+            userLabel.setBounds(10, 100, 400, 25);
+            panel.add(userLabel);
+
+            AvailableItem availBevItems = new AvailableItem();
+            List<String> availableBev = new ArrayList<String>(availBevItems.getAvailableItem("[" + "Beverage"));
+            Object[] availBevList = availableBev.toArray();
+            final JComboBox<Object> BevBox3 = new JComboBox<>(availBevList);
+            makeLabel(panel,"Please Choose a Beverage: ", 10, 150, 200,25);
+            BevBox3.setBounds(250,150,100,25);
+            panel.add(BevBox3);
             
             
-            return null;
+            BevBox3.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                beverage = BevBox3.getSelectedItem().toString();
+                
+                }
+                   
+    }); 
+            AvailableItem availMainItems = new AvailableItem();
+            List<String> availableMain = new ArrayList<String>(availMainItems.getAvailableItem("[" + "Main Item"));
+            Object[] availMainList = availableMain.toArray();
+            final JComboBox<Object> MainBox = new JComboBox<>(availMainList);
+            makeLabel(panel,"Please Choose a Main Item: ", 10, 200, 200,25);
+            MainBox.setBounds(250,200,100,25);
+            panel.add(MainBox);
+            
+            
+            MainBox.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                mainItem = MainBox.getSelectedItem().toString();
+                
+                }
+                   
+    }); 
+            
+            AvailableItem availSideItem1 = new AvailableItem();
+            List<String> availableSideItem1 = new ArrayList<String>(availSideItem1.getAvailableItem("[" + "Side Item"));
+            Object[] availSideList1 = availableSideItem1.toArray();
+            final JComboBox<Object> SideBox1 = new JComboBox<>(availSideList1);
+            makeLabel(panel,"Please Choose a Side Item: ", 10, 250, 200,25);
+            SideBox1.setBounds(250,250,100,25);
+            panel.add(SideBox1);
+            
+            
+            SideBox1.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                sideItem = SideBox1.getSelectedItem().toString();
+                
+                }
+                   
+    }); 
+            
+            AvailableItem availSideItem2 = new AvailableItem();
+            List<String> availableSideItem2 = new ArrayList<String>(availSideItem2.getAvailableItem("[" + "Side Item"));
+            Object[] availSideList2 = availableSideItem2.toArray();
+            final JComboBox<Object> SideBox2 = new JComboBox<>(availSideList2);
+            makeLabel(panel,"Please Choose a Second Side Item: ", 10, 300, 235,25);
+            SideBox2.setBounds(250,300,100,25);
+            panel.add(SideBox2);
+            
+            
+            SideBox2.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                sideItem2 = SideBox2.getSelectedItem().toString();
+                
+                }
+                   
+    }); 
+            
+            AvailableItem availDessertItem = new AvailableItem();
+            List<String> availableDessertItem = new ArrayList<String>(availDessertItem.getAvailableItem("[" + "Dessert"));
+            Object[] availDessertList = availableDessertItem.toArray();
+            final JComboBox<Object> DessertBox1 = new JComboBox<>(availDessertList);
+            makeLabel(panel,"Please Choose a Dessert: ", 10, 350, 200,25);
+            DessertBox1.setBounds(250,350,100,25);
+            panel.add(DessertBox1);
+            
+            
+            DessertBox1.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                dessert = DessertBox1.getSelectedItem().toString();
+                
+                }
+                   
+    }); 
+        
+            JButton mealPlanChoice1 = new JButton("Create Plan");
+            mealPlanChoice1.setBounds(100, 445, 175, 50);
+            panel.add(mealPlanChoice1);
+            mealPlanChoice1.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                try {
+                    MealPlan plan = new MealPlan();
+                    plan.setPlan(day, mealType, beverage, mainItem,            
+                            sideItem, sideItem2,dessert);
+                } catch (IOException ex) {
+                    Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+    });
+    
+    
+           
+            
+            
         }
         
         public MenuItem getAvailable(){
@@ -1193,17 +1054,153 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
     
     public class Calendar extends mealPlannerGUI{
         
+        private String day;
+        private String mealType;
+        private String calDay;
+        private String type;
+        
+        
         public MealPlan getPlan(){
             
             return null;
         }
         
-        public void makeCalendar(){
+        public void makeCalendar(JPanel panel) throws FileNotFoundException, IOException{
+            panel.setLayout(null);
+    
+    
+    
+    //creates breakfast, lunch and dinner labels
+    JLabel instruction = new JLabel("Display Meal Plan For: ");
+    instruction.setBounds(10, 25, 200, 25);
+    panel.add(instruction);
+    
+    String[] mealTypes = new String[] {"Breakfast", "Lunch","Dinner"};
+    
+    String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+                                "Friday", "Saturday", "Sunday"};
+    
+    final JComboBox<String> choiceBox1 = new JComboBox<>(days);
+    makeLabel(panel,"Please Choose a Day", 10, 75, 200,25);
+    choiceBox1.setBounds(250,75,100,25);
+    panel.add(choiceBox1);
+    
+    choiceBox1.addActionListener(new ActionListener(){
+        
+            @Override
+            public void actionPerformed(ActionEvent e){
+                 
+               calDay = choiceBox1.getSelectedItem().toString();
+                
+                }
+                   
+    }); 
+    
+    
+    final JComboBox<String> choiceBox2 = new JComboBox<>(mealTypes);
+    makeLabel(panel,"Please Choose a Meal Type: ", 10, 125, 200,25);
+    choiceBox2.setBounds(250,125,100,25);
+    panel.add(choiceBox2);
+     
+    choiceBox2.addActionListener(new ActionListener(){
+        
+            @Override
+            public void actionPerformed(ActionEvent e){
+                
+                    type  = choiceBox2.getSelectedItem().toString();
+            }            
+    }); 
+    
+    JButton displayCal = new JButton("Display Calendar");
+    displayCal.setBounds(200, 225, 150, 35);
+    panel.add(displayCal);
+    
+               
+    displayCal.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                
+                try {
+                    
+                    BufferedReader br;     
+                    br = new BufferedReader(new FileReader("mealPlan.txt"));
+                    if (br.readLine() == null) {
+                        JPanel errorPanel = new JPanel();
+                        makeJFrame(errorPanel, "No Meal to Display", 300,300);
+                        makeLabel(errorPanel, "Would you like to add a Meal Plan",10,10,200,25);
+                    }
+                    else{
+                        final JPanel newPanel = new JPanel();
+                    
+                    makeJFrame(newPanel, calDay + " " + type, 300,250);
+                        FileInputStream menuItemFile = null;
+                        menuItemFile = new FileInputStream("mealPlan.txt");
+                        System.out.println("empty");
+                        ResourceBundle resources;
+                        System.out.println("empty44");
+                        resources = new PropertyResourceBundle(menuItemFile);
+                        
+                        System.out.println("empty55");
+                        Map<String,String> map = new HashMap<String,String>();
+                        System.out.println("empty2");
+                        //convert ResourceBundle to Map
+                        Enumeration<String> keys = resources.getKeys();
+                        while (keys.hasMoreElements()) {
+                            String key = keys.nextElement();
+                            map.put(key, (resources.getString(key)));
+                            
+                        }
+                        System.out.println("empty3");//turns the string of attributes into an arrayList which reassembles the original hash
+                        final Map<String,ArrayList> newMap = new HashMap<String,ArrayList>();
+                        final List<String> keysList = new ArrayList<String>(map.keySet());
+                        for(int i = 0; i<keysList.size();i++){
+                            String values = map.get(keysList.get(i));
+                            String [] items = values.split(",");
+                            ArrayList<String> itemList = new ArrayList<String>(Arrays.asList(items));
+                            newMap.put(keysList.get(i),itemList);
+                        }
+                        
+                        
+                        System.out.println(newMap);
+                        //JTextField calendarContent = new JTextField("success");
+                        System.out.println(newMap.keySet());
+                        System.out.println(day + type);
+                        //this needs to be formatted differently and the brackets taken away!!!!
+                        if(!keysList.contains(calDay + type)){
+                            makeLabel(newPanel, "There is no Meal Plan for this day and time.",10,10,250,25);
+                            
+                        }
+                        else{
+                        JTextArea calendarContent = new JTextArea("Beverage: " +
+                                newMap.get(calDay + type).get(0).toString().replace("[","") + "\n"
+                                + "Main Item: " + newMap.get(calDay + type).get(1).toString().replace("[","") + "\n"
+                                + "Side Item: " + newMap.get(calDay + type).get(2).toString().replace("[","") + "\n"
+                                + "Side Item: " + newMap.get(calDay + type).get(3).toString().replace("[","") + "\n"
+                                + "Dessert: " + newMap.get(calDay + type).get(4).toString().replace("]",""));    
+                        calendarContent.setEditable(false);
+                        calendarContent.setBounds(20, 50, 300, 300);
+                        newPanel.add(calendarContent);
+                        }
+                        
+                        
+                        
+                        
+                    }   } catch (FileNotFoundException ex) {
+                    Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }  
+    }); 
+    
+    
         
     }
         
     
         
+        }
     }
+
    
-} 
+
