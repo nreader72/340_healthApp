@@ -951,7 +951,7 @@ class Ratings extends FamilyMemberGUI {
         
         mealPlannerGUI mp2 = new mealPlannerGUI();
         mealPlannerGUI.MealPlan mp3 = mp2.new MealPlan();
-        Map<String, ArrayList> newMap = mp3.mapFromFile(filePath);
+        Map<String, ArrayList> newMap = mp3.mapFromFile("mealPlan.txt");
         for (Map.Entry<String, ArrayList> entry : newMap.entrySet()) {
             txtArea.append(entry.getKey());
             txtArea.append("\n");
