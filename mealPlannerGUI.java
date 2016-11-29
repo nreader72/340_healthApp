@@ -8,6 +8,8 @@ of the Meal Planner Subsystem of a Health Management System
 
 
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -27,8 +29,11 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.Reader;
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -43,6 +48,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ButtonGroup;
+import javax.swing.text.Document;
 
 
 
@@ -52,21 +58,14 @@ import javax.swing.ButtonGroup;
 
 public  class mealPlannerGUI extends JFrame implements ActionListener,Serializable {
     
-    //static String item;
-    //static String itemType;
-    //static String description;
-    //static String calories;
+    //fields for the mealPlanner class
     HashMap<String, ArrayList> itemMap = new HashMap<>();
-    
-    //static String beverage;
-    //static String mainItem;
-    //static String sideItem;
-    //static String sideItem2;
-    //static String dessert;
+    static String deleteType;
+    static String deleteDay;
     
     public static void main(String[] args) throws BadLocationException, IOException {
 		        
-        //draws background for application
+        //background image
         JFrame frame = new JFrame("Pride Health Management");
         frame.setSize(1500, 1500);
         ImageIcon image = new ImageIcon(ImageIO.read(new File("src/resourceFolder/lion_pride.png"))
@@ -85,7 +84,7 @@ public  class mealPlannerGUI extends JFrame implements ActionListener,Serializab
         
         JPanel panel = new JPanel();
 	object.MealPlanner(panel);
-        object.makeJFrame(panel, "Meal Planner", 500, 550);
+        object.makeJFrame(panel, "Meal Planner", 500, 650);
         
         
         
@@ -122,7 +121,7 @@ public  void MealPlanner(JPanel panel) {
         
     }
     });
-    MenuItem blah = new MenuItem();
+    
     //creates a button that when clicked takes user to the make a menu item window            
     JButton mealPlanChoice2 = new JButton("Make a Menu Item");
     mealPlanChoice2.setBounds(100, 120, 280, 50);
@@ -163,10 +162,72 @@ public  void MealPlanner(JPanel panel) {
                        
     }
     });
+    //button when clicked takes user to delete a meal plan menu
+    JButton mealPlanChoice = new JButton("Delete a Meal Plan");
+    mealPlanChoice.setBounds(100, 280, 280, 50);
+    panel.add(mealPlanChoice);
+    mealPlanChoice.addActionListener(new ActionListener(){
+    @Override
+    public void actionPerformed(ActionEvent e){
+        JPanel panel = new JPanel();
+        panel.setLayout(null);
+        makeJFrame(panel, "Delete a Meal Plan", 300, 300);
+        
+        
+        String[] days = new String[] {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday",
+            "Friday", "Saturday", "Sunday"};
+        final JComboBox<String> choiceBox1 = new JComboBox<>(days);
+        makeLabel(panel,"Please Select a Day:", 10, 50, 150,25);
+        choiceBox1.setBounds(175,50,100,25); 
+        panel.add(choiceBox1);
+        choiceBox1.addActionListener(new ActionListener(){
+            
+            @Override
+            public void actionPerformed(ActionEvent e){
+                 deleteDay = choiceBox1.getSelectedItem().toString();
+                
+            }
+            
+        });
+        String[] mealTypes = new String[] {"Breakfast", "Lunch","Dinner"};
+        final JComboBox<String> choiceBox2 = new JComboBox<>(mealTypes);
+        makeLabel(panel,"Please select a type: ", 10, 100, 150,25);
+        choiceBox2.setBounds(175,100,100,25);
+        panel.add(choiceBox2);
+        choiceBox2.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                 deleteType = choiceBox2.getSelectedItem().toString();
+                
+            }
+            
+        });
+        JButton deletePlanButton = new JButton("Delete Plan");
+        deletePlanButton.setBounds(100, 200, 100, 50);
+        panel.add(deletePlanButton);
+        deletePlanButton.addActionListener(new ActionListener(){
+    @Override
+    public void actionPerformed(ActionEvent e){
+        try {
+            MealPlan deleter = new MealPlan();
+            deleter.deletePlan(deleteDay + deleteType);
+        } catch (IOException ex) {
+            Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                       
+    }
+    });
+        
+        
+        
+        
+                       
+    }
+    });
        
     //creates a button that when clicked takes user to a calendar of meal plans
     JButton mealPlanChoice4 = new JButton("Display Meal Plan Calendar");
-    mealPlanChoice4.setBounds(100, 280, 280, 50);
+    mealPlanChoice4.setBounds(100, 360, 280, 50);
     panel.add(mealPlanChoice4);
     mealPlanChoice4.addActionListener(new ActionListener(){
     @Override
@@ -184,12 +245,16 @@ public  void MealPlanner(JPanel panel) {
     
     //creates a button that returns user to family planner system
     JButton mealPlanChoice5 = new JButton("Return to Family Planner System");
-    mealPlanChoice5.setBounds(100, 360, 280, 50);
+    mealPlanChoice5.setBounds(100, 440, 280, 50);
     panel.add(mealPlanChoice5);
     mealPlanChoice5.addActionListener(new ActionListener(){
     @Override
     public void actionPerformed(ActionEvent e){
-        JPanel panel = new JPanel();
+        try {
+            FamilyMemberGUI.fullscreenGUI();
+        } catch (IOException ex) {
+            Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }
     });
@@ -235,19 +300,6 @@ public void setValue(String value){
      String newValue = value;
 }
 
-public JRadioButton getSelectedRadioButton(ButtonGroup buttonGroup) {
-
-    Enumeration<AbstractButton> abstractButtons = buttonGroup.getElements();
-    JRadioButton radioButton = null;
-
-    while (abstractButtons.hasMoreElements()) {
-        radioButton = (JRadioButton) abstractButtons.nextElement();
-        if (radioButton.isSelected()) {
-            break;
-        }
-    }
-    return radioButton;
-}
 
 /*
 method that builds a calendar with meals for the week
@@ -305,51 +357,39 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
     
 }
 
+public  void makeDisposableJFrame (JPanel panel, String frameName, int xFrame, int yFrame){
+
+    final JFrame newFrame = new JFrame(frameName);
+    newFrame.setLayout(new BorderLayout());
+    newFrame.setSize(xFrame, yFrame);
+    ImageIcon img = new ImageIcon("src/resourceFolder/Pimage.png");
+                      
+    newFrame.setIconImage(img.getImage());
+    newFrame.add(panel);
+    newFrame.setVisible(true);
+    
+    
+    JButton closeButton = new JButton("Close");
+    closeButton.setSize(50,10);
+    newFrame.add(closeButton, BorderLayout.SOUTH);
+    closeButton.addActionListener(new ActionListener(){
+    @Override
+    public void actionPerformed(ActionEvent e){
+        newFrame.dispose();
+        
+    }
+    });
+    
+    
+}
+
     @Override
     public void actionPerformed(ActionEvent e) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    public void makeAvailableFrame(String itemType) throws IOException{
-        
-    JPanel panel = new JPanel();
-            makeJFrame(panel, itemType, 300, 250);
-            
-            AvailableItem availItems = new AvailableItem();
-            List<String> available = new ArrayList<String>(availItems.getAvailableItem("[" + itemType));
-            available.toArray();
-            Object[] mealTypes = available.toArray();
-            //String[] mealTypes = new String[] {"Breakfast", "Lunch","Dinner"};
-             final JComboBox<Object> choiceBox2 = new JComboBox<>(mealTypes);
-            makeLabel(panel,"Please Choose a " + itemType +": ", 10, 125, 200,25);
-            choiceBox2.setBounds(250,125,100,25);
-            panel.add(choiceBox2);
-            //JPanel panel = new JPanel();
-        JButton addButton = new JButton("Add Item To Plan");
-            addButton.setBounds(150, 200, 150, 25);
-            panel.add(addButton);
-            
-            choiceBox2.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e){
-                setValue(choiceBox2.getSelectedItem().toString());
-                
-                }
-                   
-    }); 
-            
-            
-            
-     
-    }
-     
-
-
-
-    
- 
-
 ///////////////////////////////////////////////////////LOGIC LAYER
+//Class that accounts for calories
  public class CalorieCount extends mealPlannerGUI{
         
         private int calories;
@@ -357,10 +397,11 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
         public int getCalories(String keyItem) throws IOException{
              //calories = item.calories;
              MenuItem object = new MenuItem();
-             return  Integer.parseInt(object.getHashValue(keyItem, 2));
+             return  Integer.parseInt(object.getHashValue(keyItem, 1));
             
         }
         
+        //counts calories
         public void calculateCalories(String bevKey, String mainItemKey, String sideItemKey,
                         String dessertKey) throws IOException{
             calories = getCalories(bevKey) + getCalories(mainItemKey) + getCalories(sideItemKey)+
@@ -370,12 +411,16 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
         
     }
     
+    //determines available items based on preferences
     public class AvailableItem extends mealPlannerGUI{
         
         public List getAvailableItem(String menuType) throws IOException{
-            //gets preference list
+            
             Scanner s = new Scanner(new File("C://" + "PrideHealthMangement", "Pref.txt"));
+            
             ArrayList<String> preferenceList = new ArrayList<String>();
+            
+            
             while (s.hasNext()){
             preferenceList.add(s.next());
             }
@@ -404,7 +449,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             newMap.put(keysList.get(i),itemList);
             }
             
-            List<String> itemList2 = new ArrayList<String>(newMap.keySet());
+            
             List<String> availList = new ArrayList<String>();
             
             for (Map.Entry<String, ArrayList> entry : newMap.entrySet()) {
@@ -469,7 +514,10 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
     
     
     ////////////////////////////////////////////////////////DATA LAYER
+    //class that displays previously created menus
      public class PrevMenus extends mealPlannerGUI{
+         
+         //fields
          private String prevDay;
         private String prevType;
         private String bev;
@@ -478,19 +526,26 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
         private String sideItem2;
         private String dessert;
         private boolean isClicked;
+        
+        
+        public PrevMenus(){
+            
+        }
+        
         public MealPlan getPlan(){
             
             
         return null;
+                }
         
         
-    }
+    
         public String getRatings(MealPlan plan){
          
             return null;
         }
         
-        private void displayPlan(final JPanel panel) throws IOException{
+        public void displayPlan(final JPanel panel) throws IOException{
             panel.setLayout(null);
     
         MealPlan map = new MealPlan();
@@ -501,8 +556,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
 
         final ArrayList keyList = new ArrayList(newMap.keySet());
 
-        System.out.println(keyList.get(1));
-
+        
 
         final JTextArea eventHandler = new JTextArea();
 
@@ -516,6 +570,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
 
         JButton next = new JButton("View Plan");
         next.setBounds(200,225,100,25);
+        panel.add(next);
         next.addActionListener(new ActionListener(){
         int counter = 0;    
         @Override
@@ -609,6 +664,8 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
 
         }    
     }
+     
+     //displays the menu items and determines availability
     public class MenuItem extends mealPlannerGUI{
         String input;
         String itemType;
@@ -622,7 +679,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             calories = newCalories;
         }
         
-        private void setItem(JPanel panel){
+        private void setItem(JPanel panel) throws FileNotFoundException{
             panel.setLayout(null);
     String[] menuTypes = new String[] {"Beverage", "Main Item", "Side Item", "Dessert"};
     
@@ -666,28 +723,51 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
       
    }
     });
-        String[] users = new String[] {"Jeremy", "David", "Preston"};
-        JComboBox<String> choiceBox2 = new JComboBox<>(users);
+         Scanner users = new Scanner(new File("C://" + "PrideHealthMangement", "Users.txt"));
+            
+            ArrayList<String> usersList = new ArrayList<String>();
+            while (users.hasNext()){
+            usersList.add(users.next().replace(",", ""));
+            }
+            users.close();
+            String[] listOfUsers = usersList.toArray(new String[0]);
+            final JComboBox<String> choiceBox2 = new JComboBox<String>(listOfUsers);
+            
+        
+        
         makeLabel(panel,"View Preferences of:  ", 75, 285, 200,25);
         choiceBox2.setBounds(250,285,150,25);
         panel.add(choiceBox2);
         choiceBox2.addActionListener(new ActionListener(){
     @Override
     public void actionPerformed(ActionEvent e){
+        
         JPanel panel = new JPanel();
+        
         makeJFrame(panel, "Family Member Preferences", 400, 200);
-        String user = "blah";
+        String user = choiceBox2.getSelectedItem().toString();;
         MenuItem object1 = new MenuItem(); 
         try {
-            String blah = object1.displayPreferences(user);
-                    JTextArea eventHandler2 = new JTextArea(blah);
+            String s = object1.displayPreferences(user).toString();
+            Scanner pref;
+            pref = new Scanner(new File(s));
+            
+            ArrayList<String> preferenceList = new ArrayList<String>();
+            while (pref.hasNext()){
+            preferenceList.add(pref.next());
+            }
+            pref.close();
+                    
+                    JTextArea eventHandler2 = new JTextArea();
+                    for (Object obj : preferenceList) {
+                    eventHandler2.append(obj.toString() + "\n");
+                    
+}
                     eventHandler2.setEditable(false);
        eventHandler2.setBounds(10,150,300,300);
         panel.add(eventHandler2);
        
-//
-//
-//object1.displayPreferences(user);
+
         } catch (IOException ex) {
             Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -706,17 +786,16 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
         @Override
         public void actionPerformed(ActionEvent e){
 
-        //try {
+        
             
            String item1 = menuField.getText();
-            //description = descriptionField.getText();
+            
             calories = caloricField.getText();
             
             try {
                 
                 ArrayList itemElements = new ArrayList();
                 itemElements.add(itemType);
-                //itemElements.add(description);
                 itemElements.add(calories);
                 
                 itemMap.put(item1,itemElements);
@@ -748,12 +827,14 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             
         }
         
-        public String displayPreferences(String user) throws IOException{
+        public File displayPreferences(String user) throws IOException{
             
-            input = new Scanner(new File("testFile.txt")).useDelimiter("\\Z").next();
+            //input = new Scanner(new File("testFile.txt")).useDelimiter("\\Z").next();
+            
+            ViewPreferences obj = new ViewPreferences();
+            File userPref = obj.mealPreferences(user);
 
-
-            return input;
+            return userPref;
         }
         
         public String getHashValue(String hashKey,int index) throws FileNotFoundException, IOException{
@@ -781,6 +862,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
         
     }
     
+    //class that creates meal plans and displays them
     public class MealPlan extends mealPlannerGUI{
         
         private String day;
@@ -872,12 +954,6 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             MealPlan map = new MealPlan();
     
             Map<String,ArrayList> newMap = map.mapFromFile("mealPlan.txt");
-            
-            /*
-            Here is where the ratings will be appended to.  If they are just added
-            in a specific sequence I should be good.
-            */
-            
             
             Properties properties = new Properties();
 
@@ -1038,22 +1114,36 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
                 }
             }
     });
-    
-    
-           
+        }
+        
+
+        //deletes a specific menu plan
+        public void deletePlan(String dayAndType) throws IOException{
+            MealPlan mapDelete = new MealPlan();
+            Map<String,ArrayList> newMap = mapDelete.mapFromFile("mealPlan.txt");  
+            newMap.remove(dayAndType);
+            
+            Properties properties = new Properties();
+
+            for (Map.Entry<String,ArrayList> entry : newMap.entrySet()) {
+                properties.put(entry.getKey(), entry.getValue().toString());
+            }
+
+
+
+            FileOutputStream fos = new FileOutputStream(("mealPlan.txt"), false);
+            properties.store(fos,null);
             
             
         }
         
-        public MenuItem getAvailable(){
-            
-            return null;
-        }
-        
+       
     }
     
+    //creates a calendar and populates it according to day and meal type
     public class Calendar extends mealPlannerGUI{
         
+        //fields
         private String day;
         private String mealType;
         private String calDay;
@@ -1065,7 +1155,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
             return null;
         }
         
-        public void makeCalendar(JPanel panel) throws FileNotFoundException, IOException{
+        public void makeCalendar(final JPanel panel) throws FileNotFoundException, IOException{
             panel.setLayout(null);
     
     
@@ -1126,8 +1216,22 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
                     br = new BufferedReader(new FileReader("mealPlan.txt"));
                     if (br.readLine() == null) {
                         JPanel errorPanel = new JPanel();
-                        makeJFrame(errorPanel, "No Meal to Display", 300,300);
+                        makeDisposableJFrame(errorPanel, "No Meal to Display", 300,300);
                         makeLabel(errorPanel, "Would you like to add a Meal Plan",10,10,200,25);
+                        JButton returnMakeMeal = new JButton("Make a Meal Plan");
+                        returnMakeMeal.setBounds(125,200,125,25);
+                        errorPanel.add(returnMakeMeal);
+                        returnMakeMeal.addActionListener(new ActionListener(){
+                            public void actionPerformed(ActionEvent e){
+                                try {
+                                    JPanel newPanel = new JPanel();
+                                    MealPlan(newPanel);
+                                    makeJFrame(newPanel, "Create a Meal Plan", 400, 550);
+                                } catch (IOException ex) {
+                                    Logger.getLogger(mealPlannerGUI.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                        });
                     }
                     else{
                         final JPanel newPanel = new JPanel();
@@ -1135,14 +1239,14 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
                     makeJFrame(newPanel, calDay + " " + type, 300,250);
                         FileInputStream menuItemFile = null;
                         menuItemFile = new FileInputStream("mealPlan.txt");
-                        System.out.println("empty");
+                        
                         ResourceBundle resources;
-                        System.out.println("empty44");
+                        
                         resources = new PropertyResourceBundle(menuItemFile);
                         
-                        System.out.println("empty55");
+                        
                         Map<String,String> map = new HashMap<String,String>();
-                        System.out.println("empty2");
+                        
                         //convert ResourceBundle to Map
                         Enumeration<String> keys = resources.getKeys();
                         while (keys.hasMoreElements()) {
@@ -1150,7 +1254,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
                             map.put(key, (resources.getString(key)));
                             
                         }
-                        System.out.println("empty3");//turns the string of attributes into an arrayList which reassembles the original hash
+                        //turns the string of attributes into an arrayList which reassembles the original hash
                         final Map<String,ArrayList> newMap = new HashMap<String,ArrayList>();
                         final List<String> keysList = new ArrayList<String>(map.keySet());
                         for(int i = 0; i<keysList.size();i++){
@@ -1161,11 +1265,7 @@ public  void makeJFrame (JPanel panel, String frameName, int xFrame, int yFrame)
                         }
                         
                         
-                        System.out.println(newMap);
-                        //JTextField calendarContent = new JTextField("success");
-                        System.out.println(newMap.keySet());
-                        System.out.println(day + type);
-                        //this needs to be formatted differently and the brackets taken away!!!!
+                        
                         if(!keysList.contains(calDay + type)){
                             makeLabel(newPanel, "There is no Meal Plan for this day and time.",10,10,250,25);
                             
